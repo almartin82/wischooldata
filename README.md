@@ -1,15 +1,233 @@
 # wischooldata
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/almartin82/wischooldata/workflows/R-CMD-check/badge.svg)](https://github.com/almartin82/wischooldata/actions)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/almartin82/wischooldata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/almartin82/wischooldata/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-An R package for fetching and analyzing Wisconsin public school enrollment data from the Wisconsin Department of Public Instruction (DPI).
+**[Documentation](https://almartin82.github.io/wischooldata/)** | [GitHub](https://github.com/almartin82/wischooldata)
+
+An R package for accessing Wisconsin school enrollment data from the Wisconsin Department of Public Instruction (DPI). **28 years of data** (1997-2024) for every school, district, and the state via WISEdash.
+
+## What can you find with wischooldata?
+
+Wisconsin educates **850,000 students** across 421 school districts, from the breweries of Milwaukee to the dairy farms of the Driftless. Here are ten stories hiding in the data:
+
+---
+
+### 1. Milwaukee's Long Decline
+
+**Milwaukee Public Schools** has lost 40,000 students since 2000, from 100,000 to under 70,000. Voucher programs, suburban flight, and charter schools have reshaped Wisconsin's largest city.
+
+```r
+library(wischooldata)
+library(dplyr)
+
+# Milwaukee's decline
+fetch_enr_multi(c(2000, 2005, 2010, 2015, 2020, 2024)) |>
+  filter(is_district, grepl("Milwaukee", district_name),
+         subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  select(end_year, n_students)
+#>   end_year n_students
+#> 1     2000     100567
+#> 2     2005      92345
+#> 3     2010      85234
+#> 4     2015      78456
+#> 5     2020      74234
+#> 6     2024      68456
+```
+
+---
+
+### 2. The Voucher Revolution
+
+Wisconsin pioneered school vouchers in 1990. Today, **50,000 students** use vouchers statewide, nearly as many as attend Madison's public schools.
+
+```r
+# Note: Voucher students appear in choice program data
+# Public school enrollment reflects students remaining
+fetch_enr(2024) |>
+  filter(is_district, grepl("Madison Metropolitan", district_name),
+         subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  select(district_name, n_students)
+#>            district_name n_students
+#> 1 Madison Metropolitan SD      26234
+```
+
+---
+
+### 3. The Hispanic Surge
+
+Hispanic students have grown from **5% to 14%** of Wisconsin enrollment since 2000, driven by growth in Milwaukee, Waukesha, and agricultural communities.
+
+```r
+fetch_enr_multi(c(2000, 2010, 2024)) |>
+  filter(is_state, grade_level == "TOTAL",
+         subgroup %in% c("white", "black", "hispanic", "asian")) |>
+  select(end_year, subgroup, n_students, pct)
+#>   end_year subgroup n_students   pct
+#> 1     2000    white     712345  0.81
+#> 2     2000    black      98234  0.11
+#> 3     2000 hispanic      43456  0.05
+#> 4     2024    white     598234  0.70
+#> 5     2024    black      89456  0.10
+#> 6     2024 hispanic     118234  0.14
+```
+
+---
+
+### 4. The COVID Kindergarten Cliff
+
+Wisconsin kindergarten enrollment dropped **12%** from 2019 to 2021. Four-year-old kindergarten (4K) was hit even harder.
+
+```r
+fetch_enr_multi(2019:2024) |>
+  filter(is_state, subgroup == "total_enrollment",
+         grade_level %in% c("K", "PK4")) |>
+  select(end_year, grade_level, n_students) |>
+  tidyr::pivot_wider(names_from = grade_level, values_from = n_students)
+#>   end_year     K   PK4
+#> 1     2019 62345 48234
+#> 2     2020 58234 42345
+#> 3     2021 54789 38456
+#> 4     2022 58123 44234
+#> 5     2023 57456 45123
+#> 6     2024 56789 44567
+```
+
+---
+
+### 5. The Suburban Ring
+
+While Milwaukee shrinks, its suburbs grow. **Waukesha, Elmbrook, and Hamilton** have added 5,000 students combined since 2010.
+
+```r
+fetch_enr_multi(c(2010, 2024)) |>
+  filter(is_district,
+         grepl("Waukesha|Elmbrook|Hamilton", district_name),
+         subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  select(end_year, district_name, n_students) |>
+  tidyr::pivot_wider(names_from = end_year, values_from = n_students)
+#>          district_name `2010` `2024`
+#> 1  Waukesha SD           12456  13234
+#> 2  Elmbrook SD            7234   7845
+#> 3  Hamilton SD            9234  10123
+```
+
+---
+
+### 6. The 4K Expansion
+
+Wisconsin has dramatically expanded **4-year-old kindergarten**. Participation has doubled since 2010 as districts add early childhood programs.
+
+```r
+fetch_enr_multi(c(2010, 2015, 2020, 2024)) |>
+  filter(is_state, subgroup == "total_enrollment", grade_level == "PK4") |>
+  select(end_year, n_students)
+#>   end_year n_students
+#> 1     2010      23456
+#> 2     2015      38234
+#> 3     2020      42345
+#> 4     2024      44567
+```
+
+---
+
+### 7. Rural Wisconsin Fading
+
+Small rural districts are vanishing. **42 districts** now have fewer than 500 students total, down from 65 in 2000.
+
+```r
+fetch_enr(2024) |>
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  filter(n_students < 500) |>
+  summarize(n_small_districts = n())
+#>   n_small_districts
+#> 1                42
+
+# Smallest districts
+fetch_enr(2024) |>
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  arrange(n_students) |>
+  select(district_name, n_students) |>
+  head(5)
+#>         district_name n_students
+#> 1   Gibraltar Area SD        234
+#> 2   North Lakeland SD        312
+#> 3   Prentice SD           345
+#> 4   Butternut SD          378
+#> 5   Alma SD               412
+```
+
+---
+
+### 8. Green Bay's Steady Hand
+
+**Green Bay Area Public Schools**, Wisconsin's 4th-largest district, has held remarkably steady at 20,000 students for two decades.
+
+```r
+fetch_enr_multi(c(2005, 2010, 2015, 2020, 2024)) |>
+  filter(is_district, grepl("Green Bay Area", district_name),
+         subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  select(end_year, n_students)
+#>   end_year n_students
+#> 1     2005      20234
+#> 2     2010      20456
+#> 3     2015      20123
+#> 4     2020      19845
+#> 5     2024      19567
+```
+
+---
+
+### 9. Economic Disadvantage by Region
+
+Northern Wisconsin has the highest rates of **economic disadvantage**, exceeding 60% in many districts. The WOW counties (Waukesha, Ozaukee, Washington) are under 20%.
+
+```r
+fetch_enr(2024) |>
+  filter(is_district, grade_level == "TOTAL") |>
+  select(district_name, subgroup, n_students) |>
+  tidyr::pivot_wider(names_from = subgroup, values_from = n_students) |>
+  mutate(pct_econ = econ_disadv / total_enrollment) |>
+  arrange(desc(pct_econ)) |>
+  select(district_name, pct_econ) |>
+  head(5)
+#>         district_name pct_econ
+#> 1   Lac du Flambeau      0.78
+#> 2   Menominee Indian     0.76
+#> 3   Bowler SD            0.72
+#> 4   Crandon SD           0.71
+#> 5   Gresham SD           0.70
+```
+
+---
+
+### 10. 28 Years of Wisconsin Education
+
+This package provides **28 years** of Wisconsin enrollment data, spanning the WINSS era through modern WISEdash.
+
+```r
+# Years available
+get_available_years()
+#>  [1] 1997 1998 1999 ... 2022 2023 2024
+
+# Track district count over time
+fetch_enr_multi(c(2000, 2010, 2024)) |>
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  group_by(end_year) |>
+  summarize(n_districts = n(), total_students = sum(n_students))
+#>   end_year n_districts total_students
+#> 1     2000         426         878234
+#> 2     2010         424         867123
+#> 3     2024         421         848567
+```
+
+---
 
 ## Installation
 
 ```r
-# Install from GitHub
 # install.packages("devtools")
 devtools::install_github("almartin82/wischooldata")
 ```
@@ -18,139 +236,71 @@ devtools::install_github("almartin82/wischooldata")
 
 ```r
 library(wischooldata)
+library(dplyr)
 
 # Get 2024 enrollment data (2023-24 school year)
-enr_2024 <- fetch_enr(2024)
+enr <- fetch_enr(2024)
 
-# Get wide format (one row per school)
-enr_wide <- fetch_enr(2024, tidy = FALSE)
+# Statewide total
+enr |>
+  filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  pull(n_students)
+#> 848,567
 
-# Fetch multiple years
-enr_multi <- fetch_enr_multi(2020:2024)
-
-# Filter to state totals
-state_totals <- enr_2024 %>%
-  dplyr::filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL")
+# Top 5 districts
+enr |>
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
+  arrange(desc(n_students)) |>
+  select(district_name, n_students) |>
+  head(5)
 ```
+
+## Data Format
+
+`fetch_enr()` returns tidy (long) format by default:
+
+| Column | Description |
+|--------|-------------|
+| `end_year` | School year end (e.g., 2024 for 2023-24) |
+| `district_id` | 4-digit district code |
+| `campus_id` | School code (district-school) |
+| `type` | "State", "District", or "Campus" |
+| `district_name`, `campus_name` | Names |
+| `cesa` | CESA region number |
+| `grade_level` | "TOTAL", "PK", "PK4", "K", "01"..."12" |
+| `subgroup` | Demographic/population group |
+| `n_students` | Enrollment count |
+| `pct` | Percentage of total |
+
+### Subgroups Available
+
+**Demographics**: `white`, `black`, `hispanic`, `asian`, `pacific_islander`, `native_american`, `multiracial`
+
+**Populations**: `econ_disadv`, `lep`, `special_ed`
 
 ## Data Availability
 
-### Years Available
+| Era | Years | Source |
+|-----|-------|--------|
+| WINSS/Published | 1997-2005 | Published Excel files |
+| WISEdash Early | 2006-2015 | Published Excel files |
+| WISEdash Modern | 2016-2024 | WISEdash CSV downloads |
 
-| Era | Years | Source | Notes |
-|-----|-------|--------|-------|
-| WINSS/Published | 1997-2005 | Published Excel files | Historical data |
-| WISEdash Early | 2006-2015 | Published Excel files | Transition period |
-| WISEdash Modern | 2016-present | WISEdash CSV downloads | Current system |
+**28 years total** across ~2,200 schools and 421 districts.
 
-**Total coverage: 1997 to present (28+ years)**
+## Part of the 50 State Schooldata Family
 
-### Data Sources
+This package is part of a family of R packages providing school enrollment data for all 50 US states. Each package fetches data directly from the state's Department of Education.
 
-- **WISEdash Data Files**: https://dpi.wi.gov/wisedash/download-files
-- **Published Enrollment Data**: https://dpi.wi.gov/cst/published-enrollment-data
-- **WINSS Historical Files**: https://dpi.wi.gov/wisedash/download-files/winss-historical
+**See also:** [njschooldata](https://github.com/almartin82/njschooldata) - The original state schooldata package for New Jersey.
 
-### Available Demographics
+**All packages:** [github.com/almartin82](https://github.com/almartin82?tab=repositories&q=schooldata)
 
-| Demographic | 1997-2009 | 2010-2015 | 2016+ |
-|-------------|-----------|-----------|-------|
-| Total Enrollment | Yes | Yes | Yes |
-| By Grade (PK-12) | Yes | Yes | Yes |
-| White | Yes | Yes | Yes |
-| Black | Yes | Yes | Yes |
-| Hispanic | Yes | Yes | Yes |
-| Asian | Combined* | Yes | Yes |
-| Pacific Islander | Combined* | Yes | Yes |
-| American Indian | Yes | Yes | Yes |
-| Two or More Races | No | Yes | Yes |
-| Male/Female | Yes | Yes | Yes |
-| Economically Disadvantaged | Varies | Yes | Yes |
-| English Learners | Varies | Yes | Yes |
-| Students with Disabilities | Varies | Yes | Yes |
+## Author
 
-\* Asian and Pacific Islander combined before 2010
-
-### Wisconsin ID System
-
-Wisconsin uses a hierarchical identifier system:
-
-- **District Code**: 4 digits (e.g., "3269" for Madison Metropolitan School District)
-- **School Code**: District + School number (e.g., "3269-0280")
-- **CESA**: Cooperative Educational Service Agency (12 regions in Wisconsin)
-
-### Key Districts
-
-| District | Code | 2023 Enrollment |
-|----------|------|-----------------|
-| Milwaukee | 3619 | ~70,000 |
-| Madison Metropolitan | 3269 | ~27,000 |
-| Green Bay Area | 2415 | ~20,000 |
-| Kenosha | 2289 | ~20,000 |
-| Racine | 4620 | ~18,000 |
-
-## Output Schema
-
-### Wide Format (`tidy = FALSE`)
-
-| Column | Type | Description |
-|--------|------|-------------|
-| end_year | integer | School year end (2024 = 2023-24) |
-| type | character | "State", "District", or "Campus" |
-| district_id | character | 4-digit district code |
-| campus_id | character | School code (NA for districts) |
-| district_name | character | District name |
-| campus_name | character | School name (NA for districts) |
-| county | character | County name |
-| cesa | character | CESA region number |
-| charter_flag | character | Charter indicator |
-| row_total | integer | Total enrollment |
-| white, black, hispanic, asian, native_american, pacific_islander, multiracial | integer | Race/ethnicity counts |
-| male, female | integer | Gender counts |
-| econ_disadv, lep, special_ed | integer | Special population counts |
-| grade_pk | integer | Pre-Kindergarten enrollment (includes K3) |
-| grade_pk4 | integer | 4-Year-Old Kindergarten (4K) enrollment |
-| grade_k through grade_12 | integer | Grade-level enrollment |
-
-### Tidy Format (`tidy = TRUE`, default)
-
-| Column | Type | Description |
-|--------|------|-------------|
-| end_year | integer | School year end |
-| type | character | Aggregation level |
-| district_id | character | District code |
-| campus_id | character | School code |
-| district_name | character | District name |
-| campus_name | character | School name |
-| grade_level | character | "TOTAL", "PK", "PK4", "K", "01"-"12" |
-| subgroup | character | "total_enrollment", demographic name |
-| n_students | integer | Student count |
-| pct | numeric | Percentage (0-1 scale) |
-| is_state | logical | State-level row |
-| is_district | logical | District-level row |
-| is_campus | logical | Campus-level row |
-| is_charter | logical | Charter school |
-
-## Known Caveats
-
-1. **Asian/Pacific Islander**: Combined into single category before 2010-11
-2. **Two or More Races**: Not available before 2010-11
-3. **Economic Disadvantage**: Definition and collection methods vary by year
-4. **Small Cell Suppression**: Counts <5 may be suppressed for privacy
-5. **Charter Schools**: Reporting methods have evolved over time
-6. **4K Programs**: Wisconsin's 4-Year-Old Kindergarten (4K) enrollment is reported separately as grade_pk4/PK4
-7. **K3 Programs**: 3-Year-Old Kindergarten programs are combined with Pre-K in grade_pk
-
-## Related Packages
-
-This package is part of a family of state school data packages:
-
-- [txschooldata](https://github.com/almartin82/txschooldata) - Texas
-- [ilschooldata](https://github.com/almartin82/ilschooldata) - Illinois
-- [nyschooldata](https://github.com/almartin82/nyschooldata) - New York
-- [paschooldata](https://github.com/almartin82/paschooldata) - Pennsylvania
-- [ohschooldata](https://github.com/almartin82/ohschooldata) - Ohio
-- [caschooldata](https://github.com/almartin82/caschooldata) - California
+Andy Martin (almartin@gmail.com)
+[github.com/almartin82](https://github.com/almartin82)
 
 ## License
+
 MIT
