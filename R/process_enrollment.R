@@ -106,7 +106,7 @@ process_wisedash_enr <- function(df, end_year) {
 
   # Create grade_clean column for pivoting
   # Wisconsin has: K3 (3-year kindergarten), K4 (4K), KG (kindergarten), PK, and grades 1-12
-  df <- df %>%
+  df <- df |>
     dplyr::mutate(
       grade_clean = dplyr::case_when(
         grade %in% c("PK", "K3") ~ "grade_pk",  # Pre-K and 3-year-old kindergarten
@@ -129,7 +129,7 @@ process_wisedash_enr <- function(df, end_year) {
     )
 
   # Filter out non-grade rows (keep only valid grades)
-  df <- df %>%
+  df <- df |>
     dplyr::filter(!is.na(grade_clean))
 
   # =============================================
@@ -142,17 +142,17 @@ process_wisedash_enr <- function(df, end_year) {
   # =============================================
 
   # Get one row per district/school/grade to extract totals
-  totals <- df %>%
+  totals <- df |>
     dplyr::select(district_id, district_name, campus_id, campus_name,
                   dplyr::any_of(c("county", "cesa", "charter_flag")),
-                  grade_clean, group_count) %>%
-    dplyr::distinct() %>%
+                  grade_clean, group_count) |>
+    dplyr::distinct() |>
     dplyr::filter(!is.na(group_count))
 
   # School-level totals (where campus_id is not empty)
-  school_totals <- totals %>%
+  school_totals <- totals |>
     dplyr::filter(!is.na(campus_id) & campus_id != "" & campus_id != "0" &
-                  !is.na(district_id) & district_id != "0000") %>%
+                  !is.na(district_id) & district_id != "0000") |>
     tidyr::pivot_wider(
       id_cols = c(district_id, district_name, campus_id, campus_name,
                   dplyr::any_of(c("county", "cesa", "charter_flag"))),
@@ -172,9 +172,9 @@ process_wisedash_enr <- function(df, end_year) {
 
   # District-level: use the district-level rows directly (campus_id is empty)
   # These rows already have the correct district totals - no need to aggregate
-  district_totals <- totals %>%
+  district_totals <- totals |>
     dplyr::filter(!is.na(district_id) & district_id != "0000" &
-                  (is.na(campus_id) | campus_id == "" | campus_id == "0")) %>%
+                  (is.na(campus_id) | campus_id == "" | campus_id == "0")) |>
     tidyr::pivot_wider(
       id_cols = c(district_id, district_name, dplyr::any_of(c("county", "cesa"))),
       names_from = grade_clean,
@@ -197,8 +197,8 @@ process_wisedash_enr <- function(df, end_year) {
   # =============================================
 
   # Race/Ethnicity
-  race_data <- df %>%
-    dplyr::filter(group_by == "Race/Ethnicity") %>%
+  race_data <- df |>
+    dplyr::filter(group_by == "Race/Ethnicity") |>
     dplyr::mutate(
       demo_col = dplyr::case_when(
         grepl("White", group_value, ignore.case = TRUE) ~ "white",
@@ -210,52 +210,52 @@ process_wisedash_enr <- function(df, end_year) {
         grepl("Two or More", group_value, ignore.case = TRUE) ~ "multiracial",
         TRUE ~ NA_character_
       )
-    ) %>%
+    ) |>
     dplyr::filter(!is.na(demo_col))
 
   # Gender
-  gender_data <- df %>%
-    dplyr::filter(group_by == "Gender") %>%
+  gender_data <- df |>
+    dplyr::filter(group_by == "Gender") |>
     dplyr::mutate(
       demo_col = dplyr::case_when(
         grepl("^Male$", group_value, ignore.case = TRUE) ~ "male",
         grepl("^Female$", group_value, ignore.case = TRUE) ~ "female",
         TRUE ~ NA_character_
       )
-    ) %>%
+    ) |>
     dplyr::filter(!is.na(demo_col))
 
   # Economic Status
-  econ_data <- df %>%
-    dplyr::filter(group_by == "Economic Status") %>%
+  econ_data <- df |>
+    dplyr::filter(group_by == "Economic Status") |>
     dplyr::mutate(
       demo_col = dplyr::case_when(
         grepl("Economically Disadvantaged", group_value, ignore.case = TRUE) ~ "econ_disadv",
         TRUE ~ NA_character_
       )
-    ) %>%
+    ) |>
     dplyr::filter(!is.na(demo_col))
 
   # EL Status
-  el_data <- df %>%
-    dplyr::filter(group_by == "EL Status") %>%
+  el_data <- df |>
+    dplyr::filter(group_by == "EL Status") |>
     dplyr::mutate(
       demo_col = dplyr::case_when(
         grepl("^EL$|English Learner", group_value, ignore.case = TRUE) ~ "lep",
         TRUE ~ NA_character_
       )
-    ) %>%
+    ) |>
     dplyr::filter(!is.na(demo_col))
 
   # Disability Status
-  sped_data <- df %>%
-    dplyr::filter(group_by == "Disability Status") %>%
+  sped_data <- df |>
+    dplyr::filter(group_by == "Disability Status") |>
     dplyr::mutate(
       demo_col = dplyr::case_when(
         grepl("^SWD$|Students with Disabilities", group_value, ignore.case = TRUE) ~ "special_ed",
         TRUE ~ NA_character_
       )
-    ) %>%
+    ) |>
     dplyr::filter(!is.na(demo_col))
 
   # Combine all demographics
@@ -263,14 +263,14 @@ process_wisedash_enr <- function(df, end_year) {
 
   if (nrow(all_demos) > 0) {
     # Aggregate demographics by school (sum across all grades)
-    school_demos <- all_demos %>%
+    school_demos <- all_demos |>
       dplyr::filter(!is.na(campus_id) & campus_id != "" & campus_id != "0" &
-                    !is.na(district_id) & district_id != "0000") %>%
-      dplyr::group_by(district_id, campus_id, demo_col) %>%
+                    !is.na(district_id) & district_id != "0000") |>
+      dplyr::group_by(district_id, campus_id, demo_col) |>
       dplyr::summarize(
         count = sum(student_count, na.rm = TRUE),
         .groups = "drop"
-      ) %>%
+      ) |>
       tidyr::pivot_wider(
         names_from = demo_col,
         values_from = count,
@@ -278,14 +278,14 @@ process_wisedash_enr <- function(df, end_year) {
       )
 
     # District demographics: use district-level rows (campus_id is empty)
-    district_demos <- all_demos %>%
+    district_demos <- all_demos |>
       dplyr::filter(!is.na(district_id) & district_id != "0000" &
-                    (is.na(campus_id) | campus_id == "" | campus_id == "0")) %>%
-      dplyr::group_by(district_id, demo_col) %>%
+                    (is.na(campus_id) | campus_id == "" | campus_id == "0")) |>
+      dplyr::group_by(district_id, demo_col) |>
       dplyr::summarize(
         count = sum(student_count, na.rm = TRUE),
         .groups = "drop"
-      ) %>%
+      ) |>
       tidyr::pivot_wider(
         names_from = demo_col,
         values_from = count,
@@ -326,7 +326,7 @@ process_wisedash_enr <- function(df, end_year) {
   # Keep only columns that exist
   existing_cols <- standard_cols[standard_cols %in% names(result)]
 
-  result <- result %>%
+  result <- result |>
     dplyr::select(dplyr::all_of(existing_cols))
 
   result
@@ -476,7 +476,7 @@ process_published_enr <- function(df, end_year) {
   }
 
   # Remove rows with no data
-  result <- result %>%
+  result <- result |>
     dplyr::filter(!is.na(row_total) | !is.na(district_id))
 
   result
@@ -492,7 +492,7 @@ process_published_enr <- function(df, end_year) {
 create_state_aggregate <- function(df, end_year) {
 
   # Get district-level data only
-  district_df <- df %>%
+  district_df <- df |>
     dplyr::filter(type == "District")
 
   if (nrow(district_df) == 0) {
