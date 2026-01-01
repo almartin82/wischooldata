@@ -25,10 +25,8 @@ navbar:
       menu:
       - text: "---"
       - text: "Tutorials"
-      - text: Getting Started
-        href: articles/quickstart.html
-      - text: Data Quality Analysis
-        href: articles/data-quality-qa.html
+      - text: 10 Insights from Wisconsin School Enrollment Data
+        href: articles/enrollment_hooks.html
 
 reference:
 - title: Fetch Data
