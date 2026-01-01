@@ -3,11 +3,12 @@
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/almartin82/wischooldata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/almartin82/wischooldata/actions/workflows/R-CMD-check.yaml)
+[![Python Tests](https://github.com/almartin82/wischooldata/actions/workflows/python-test.yaml/badge.svg)](https://github.com/almartin82/wischooldata/actions/workflows/python-test.yaml)
 <!-- badges: end -->
 
 **[Documentation](https://almartin82.github.io/wischooldata/)** | [GitHub](https://github.com/almartin82/wischooldata)
 
-An R package for accessing Wisconsin school enrollment data from the Wisconsin Department of Public Instruction (DPI). **28 years of data** (1997-2024) for every school, district, and the state via WISEdash.
+Fetch and analyze Wisconsin school enrollment data from the Wisconsin Department of Public Instruction (DPI) in R or Python. **28 years of data** (1997-2024) for every school, district, and the state via WISEdash.
 
 ## What can you find with wischooldata?
 
@@ -242,6 +243,8 @@ devtools::install_github("almartin82/wischooldata")
 
 ## Quick Start
 
+### R
+
 ```r
 library(wischooldata)
 library(dplyr)
@@ -261,6 +264,28 @@ enr |>
   arrange(desc(n_students)) |>
   select(district_name, n_students) |>
   head(5)
+```
+
+### Python
+
+```python
+import pywischooldata as wi
+
+# Get 2024 enrollment data (2023-24 school year)
+df = wi.fetch_enr(2024)
+
+# Statewide total
+state_total = df[(df['is_state']) &
+                 (df['subgroup'] == 'total_enrollment') &
+                 (df['grade_level'] == 'TOTAL')]['n_students'].values[0]
+print(state_total)
+#> 848567
+
+# Top 5 districts
+districts = df[(df['is_district']) &
+               (df['subgroup'] == 'total_enrollment') &
+               (df['grade_level'] == 'TOTAL')]
+print(districts.nlargest(5, 'n_students')[['district_name', 'n_students']])
 ```
 
 ## Data Format
