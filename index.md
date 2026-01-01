@@ -240,6 +240,18 @@ fetch_enr_multi(c(2000, 2010, 2024)) |>
 
 ------------------------------------------------------------------------
 
+## Enrollment Visualizations
+
+![Wisconsin statewide enrollment
+trends](https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/statewide-chart-1.png)
+
+![Top Wisconsin
+districts](https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/top-districts-chart-1.png)
+
+See the [full
+vignette](https://almartin82.github.io/wischooldata/articles/enrollment_hooks.html)
+for more insights.
+
 ## Installation
 
 ``` r
@@ -305,17 +317,12 @@ returns tidy (long) format by default:
 
 **28 years total** across ~2,200 schools and 421 districts.
 
-## Part of the 50 State Schooldata Family
+## Part of the State Schooldata Project
 
-This package is part of a family of R packages providing school
-enrollment data for all 50 US states. Each package fetches data directly
-from the state’s Department of Education.
+A simple, consistent interface for accessing state-published school data
+in Python and R.
 
-**See also:**
-[njschooldata](https://github.com/almartin82/njschooldata) - The
-original state schooldata package for New Jersey.
-
-**All packages:**
+**All 50 state packages:**
 [github.com/almartin82](https://github.com/almartin82?tab=repositories&q=schooldata)
 
 ## Author
