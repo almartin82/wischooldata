@@ -118,12 +118,13 @@ download_wisedash_enrollment <- function(end_year) {
   # Find the CSV file(s) in the extracted contents
   csv_files <- list.files(temp_dir, pattern = "\\.csv$", full.names = TRUE, recursive = TRUE)
 
-  # Filter to enrollment files (exclude any metadata files)
+  # Filter to enrollment files (exclude any metadata/layout files)
   enr_files <- csv_files[grep("enrollment", csv_files, ignore.case = TRUE)]
+  enr_files <- enr_files[!grepl("_layout\\.csv$", enr_files, ignore.case = TRUE)]
 
   if (length(enr_files) == 0) {
-    # Fall back to any CSV file
-    enr_files <- csv_files
+    # Fall back to any CSV file that's not a layout file
+    enr_files <- csv_files[!grepl("_layout\\.csv$", csv_files, ignore.case = TRUE)]
   }
 
   if (length(enr_files) == 0) {
