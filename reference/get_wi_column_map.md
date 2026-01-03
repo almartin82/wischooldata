@@ -6,14 +6,14 @@ Column names vary by era and file type.
 ## Usage
 
 ``` r
-get_wi_column_map(era = "wisedash_modern")
+get_wi_column_map(era = "wisedash")
 ```
 
 ## Arguments
 
 - era:
 
-  Data era ("winss", "wisedash_early", "wisedash_modern")
+  Data era ("published", "wisedash")
 
 ## Value
 
