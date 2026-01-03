@@ -30,13 +30,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Tutorials</h6></li>
-    <li><a class="dropdown-item" href="../articles/quickstart.html">Getting Started</a></li>
-    <li><a class="dropdown-item" href="../articles/data-quality-qa.html">Data Quality Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/enrollment_hooks.html">10 Insights from Wisconsin School Enrollment Data</a></li>
   </ul>
 </li>
       </ul>
@@ -85,7 +84,7 @@ school system.</p>
 enrollment spread across urban centers and rural dairy country
 alike.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fetch_enr_multi.html">fetch_enr_multi</a></span><span class="op">(</span><span class="fl">2018</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">enr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fetch_enr_multi.html">fetch_enr_multi</a></span><span class="op">(</span><span class="fl">2018</span><span class="op">:</span><span class="fl">2024</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">state_totals</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -93,18 +92,27 @@ alike.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>change <span class="op">=</span> <span class="va">n_students</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span>,</span>
 <span>         pct_change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">change</span> <span class="op">/</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">state_totals</span></span></code></pre></div>
+<span><span class="va">state_totals</span></span>
+<span><span class="co">#&gt;   end_year n_students change pct_change</span></span>
+<span><span class="co">#&gt; 1     2018     860130     NA         NA</span></span>
+<span><span class="co">#&gt; 2     2019     858833  -1297      -0.15</span></span>
+<span><span class="co">#&gt; 3     2020     854959  -3874      -0.45</span></span>
+<span><span class="co">#&gt; 4     2021     829935 -25024      -2.93</span></span>
+<span><span class="co">#&gt; 5     2022     829143   -792      -0.10</span></span>
+<span><span class="co">#&gt; 6     2023     822804  -6339      -0.76</span></span>
+<span><span class="co">#&gt; 7     2024     814002  -8802      -1.07</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">state_totals</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end_year</span>, y <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span>, color <span class="op">=</span> <span class="st">"#C5050C"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span>, color <span class="op">=</span> <span class="st">"#C5050C"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Wisconsin Public School Enrollment (2018-2025)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Wisconsin Public School Enrollment (2018-2024)"</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">"Tracking enrollment trends across the Badger State"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"School Year (ending)"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Total Enrollment"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
+<p><img src="enrollment_hooks_files/figure-html/statewide-chart-1.png" class="r-plt" alt="" width="768"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -113,26 +121,38 @@ alike.</p>
 <p>Milwaukee Public Schools is by far the largest district, serving over
 70,000 students—more than the next five districts combined.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">enr_2025</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fetch_enr.html">fetch_enr</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">enr_2024</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fetch_enr.html">fetch_enr</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">top_10</span> <span class="op">&lt;-</span> <span class="va">enr_2025</span> <span class="op">|&gt;</span></span>
+<span><span class="va">top_10</span> <span class="op">&lt;-</span> <span class="va">enr_2024</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">n_students</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">top_10</span></span></code></pre></div>
+<span><span class="va">top_10</span></span>
+<span><span class="co">#&gt;            district_name n_students</span></span>
+<span><span class="co">#&gt; 1              Milwaukee      66864</span></span>
+<span><span class="co">#&gt; 2   Madison Metropolitan      25247</span></span>
+<span><span class="co">#&gt; 3                Kenosha      18719</span></span>
+<span><span class="co">#&gt; 4  Green Bay Area Public      18579</span></span>
+<span><span class="co">#&gt; 5         Racine Unified      15963</span></span>
+<span><span class="co">#&gt; 6          Appleton Area      15230</span></span>
+<span><span class="co">#&gt; 7               Waukesha      11318</span></span>
+<span><span class="co">#&gt; 8        Eau Claire Area      10866</span></span>
+<span><span class="co">#&gt; 9         Sheboygan Area       9427</span></span>
+<span><span class="co">#&gt; 10            Janesville       9414</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">top_10</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>district_name <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu">fct_reorder</span><span class="op">(</span><span class="va">district_name</span>, <span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>district_name <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_reorder.html" class="external-link">fct_reorder</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">n_students</span>, y <span class="op">=</span> <span class="va">district_name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"#C5050C"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Wisconsin's 10 Largest School Districts (2025)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Wisconsin's 10 Largest School Districts (2024)"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"Total Enrollment"</span>,</span>
 <span>    y <span class="op">=</span> <span class="cn">NULL</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
+<p><img src="enrollment_hooks_files/figure-html/top-districts-chart-1.png" class="r-plt" alt="" width="768"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -142,28 +162,36 @@ alike.</p>
 state as a whole remains predominantly white—a stark urban-rural
 divide.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">demographics</span> <span class="op">&lt;-</span> <span class="va">enr_2025</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">demographics</span> <span class="op">&lt;-</span> <span class="va">enr_2024</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
 <span>         <span class="va">subgroup</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hispanic"</span>, <span class="st">"white"</span>, <span class="st">"black"</span>, <span class="st">"asian"</span>, <span class="st">"multiracial"</span>, <span class="st">"native_american"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">subgroup</span>, <span class="va">n_students</span>, <span class="va">pct</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">demographics</span></span></code></pre></div>
+<span><span class="va">demographics</span></span>
+<span><span class="co">#&gt;          subgroup n_students  pct</span></span>
+<span><span class="co">#&gt; 1           white     541411 66.5</span></span>
+<span><span class="co">#&gt; 2        hispanic     114020 14.0</span></span>
+<span><span class="co">#&gt; 3           black      71146  8.7</span></span>
+<span><span class="co">#&gt; 4     multiracial      43621  5.4</span></span>
+<span><span class="co">#&gt; 5           asian      34881  4.3</span></span>
+<span><span class="co">#&gt; 6 native_american       8245  1.0</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">demographics</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>subgroup <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu">fct_reorder</span><span class="op">(</span><span class="va">subgroup</span>, <span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>subgroup <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_reorder.html" class="external-link">fct_reorder</a></span><span class="op">(</span><span class="va">subgroup</span>, <span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">n_students</span>, y <span class="op">=</span> <span class="va">subgroup</span>, fill <span class="op">=</span> <span class="va">subgroup</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>show.legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">pct</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span>, hjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span>, expand <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span>mult <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.15</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set2"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Wisconsin Student Demographics (2025)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Wisconsin Student Demographics (2024)"</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">"Statewide racial/ethnic composition"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"Number of Students"</span>,</span>
 <span>    y <span class="op">=</span> <span class="cn">NULL</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
+<p><img src="enrollment_hooks_files/figure-html/demographics-chart-1.png" class="r-plt" alt="" width="768"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -173,7 +201,7 @@ divide.</p>
 (CESAs) that provide support services to districts. Enrollment varies
 widely by region.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cesa_totals</span> <span class="op">&lt;-</span> <span class="va">enr_2025</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">cesa_totals</span> <span class="op">&lt;-</span> <span class="va">enr_2024</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
 <span>         <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">cesa</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">cesa</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -184,19 +212,35 @@ widely by region.</p>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">total_students</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cesa_totals</span></span></code></pre></div>
+<span><span class="va">cesa_totals</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 3</span></span></span>
+<span><span class="co">#&gt;    cesa  n_districts total_students</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 01             66         <span style="text-decoration: underline;">236</span>097</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 02             78         <span style="text-decoration: underline;">149</span>803</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 06             39          <span style="text-decoration: underline;">95</span>481</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 07             38          <span style="text-decoration: underline;">82</span>704</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 05             36          <span style="text-decoration: underline;">49</span>470</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 11             39          <span style="text-decoration: underline;">47</span>054</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 10             29          <span style="text-decoration: underline;">35</span>729</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 04             26          <span style="text-decoration: underline;">34</span>420</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 09             22          <span style="text-decoration: underline;">32</span>060</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 08             27          <span style="text-decoration: underline;">19</span>196</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> 03             31          <span style="text-decoration: underline;">18</span>121</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> 12             18          <span style="text-decoration: underline;">13</span>867</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cesa_totals</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cesa <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu">fct_reorder</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">cesa</span><span class="op">)</span>, <span class="va">total_students</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cesa <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_reorder.html" class="external-link">fct_reorder</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">cesa</span><span class="op">)</span>, <span class="va">total_students</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">total_students</span>, y <span class="op">=</span> <span class="va">cesa</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"#282728"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Enrollment by CESA Region (2025)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Enrollment by CESA Region (2024)"</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">"Wisconsin's 12 Cooperative Educational Service Agencies"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"Total Enrollment"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"CESA"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
+<p><img src="enrollment_hooks_files/figure-html/regional-chart-1.png" class="r-plt" alt="" width="768"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -208,33 +252,47 @@ steady.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">growth</span> <span class="op">&lt;-</span> <span class="va">enr</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
-<span>         <span class="va">end_year</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2018</span>, <span class="fl">2025</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>         <span class="va">end_year</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2018</span>, <span class="fl">2024</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">district_id</span>, <span class="va">district_name</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span></span>
 <span>    y2018 <span class="op">=</span> <span class="va">n_students</span><span class="op">[</span><span class="va">end_year</span> <span class="op">==</span> <span class="fl">2018</span><span class="op">]</span>,</span>
-<span>    y2025 <span class="op">=</span> <span class="va">n_students</span><span class="op">[</span><span class="va">end_year</span> <span class="op">==</span> <span class="fl">2025</span><span class="op">]</span>,</span>
-<span>    pct_change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="op">(</span><span class="va">y2025</span> <span class="op">/</span> <span class="va">y2018</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    y2024 <span class="op">=</span> <span class="va">n_students</span><span class="op">[</span><span class="va">end_year</span> <span class="op">==</span> <span class="fl">2024</span><span class="op">]</span>,</span>
+<span>    pct_change <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="op">(</span><span class="va">y2024</span> <span class="op">/</span> <span class="va">y2018</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">y2018</span> <span class="op">&gt;</span> <span class="fl">5000</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">pct_change</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">growth</span></span></code></pre></div>
+<span><span class="va">growth</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 5</span></span></span>
+<span><span class="co">#&gt;    district_id district_name               y2018 y2024 pct_change</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 0714        Elmbrook                     <span style="text-decoration: underline;">7</span>239  <span style="text-decoration: underline;">7</span>863        8.6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 5901        Verona Area                  <span style="text-decoration: underline;">5</span>543  <span style="text-decoration: underline;">5</span>794        4.5</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 5656        Sun Prairie Area             <span style="text-decoration: underline;">8</span>428  <span style="text-decoration: underline;">8</span>411       -<span style="color: #BB0000;">0.2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4970        D C Everest Area             <span style="text-decoration: underline;">6</span>003  <span style="text-decoration: underline;">5</span>954       -<span style="color: #BB0000;">0.8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 4018        Oak Creek-Franklin Joint     <span style="text-decoration: underline;">6</span>584  <span style="text-decoration: underline;">6</span>527       -<span style="color: #BB0000;">0.9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 5607        Stevens Point Area Public    <span style="text-decoration: underline;">7</span>095  <span style="text-decoration: underline;">6</span>980       -<span style="color: #BB0000;">1.6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2835        Kimberly Area                <span style="text-decoration: underline;">5</span>204  <span style="text-decoration: underline;">5</span>058       -<span style="color: #BB0000;">2.8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 3892        Neenah Joint                 <span style="text-decoration: underline;">6</span>699  <span style="text-decoration: underline;">6</span>497       -<span style="color: #BB0000;">3</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3549        Middleton-Cross Plains Area  <span style="text-decoration: underline;">7</span>325  <span style="text-decoration: underline;">7</span>059       -<span style="color: #BB0000;">3.6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 1554        Eau Claire Area             <span style="text-decoration: underline;">11</span>367 <span style="text-decoration: underline;">10</span>866       -<span style="color: #BB0000;">4.4</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">growth</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>district_name <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu">fct_reorder</span><span class="op">(</span><span class="va">district_name</span>, <span class="va">pct_change</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>district_name <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_reorder.html" class="external-link">fct_reorder</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">pct_change</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pct_change</span>, y <span class="op">=</span> <span class="va">district_name</span>, fill <span class="op">=</span> <span class="va">pct_change</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>show.legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray40"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TRUE"</span> <span class="op">=</span> <span class="st">"#0479A8"</span>, <span class="st">"FALSE"</span> <span class="op">=</span> <span class="st">"#C5050C"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Enrollment Change in Large Districts (2018-2025)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Enrollment Change in Large Districts (2018-2024)"</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">"Districts with 5,000+ students in 2018"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"Percent Change"</span>,</span>
 <span>    y <span class="op">=</span> <span class="cn">NULL</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
+<p><img src="enrollment_hooks_files/figure-html/growth-chart-1.png" class="r-plt" alt="" width="768"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -253,7 +311,54 @@ shifts.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">district_name</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">end_year</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">milwaukee_summary</span></span></code></pre></div>
+<span><span class="va">milwaukee_summary</span></span>
+<span><span class="co">#&gt;    end_year                                district_name n_students</span></span>
+<span><span class="co">#&gt; 1      2024    Central City Cyberschool of Milwaukee Inc        378</span></span>
+<span><span class="co">#&gt; 2      2023  Central City Cyberschool of Milwaukee, Inc.        389</span></span>
+<span><span class="co">#&gt; 3      2018                                    Milwaukee      75539</span></span>
+<span><span class="co">#&gt; 4      2019                                    Milwaukee      75431</span></span>
+<span><span class="co">#&gt; 5      2020                                    Milwaukee      74683</span></span>
+<span><span class="co">#&gt; 6      2021                                    Milwaukee      71510</span></span>
+<span><span class="co">#&gt; 7      2022                                    Milwaukee      69115</span></span>
+<span><span class="co">#&gt; 8      2023                                    Milwaukee      67500</span></span>
+<span><span class="co">#&gt; 9      2024                                    Milwaukee      66864</span></span>
+<span><span class="co">#&gt; 10     2018                 Milwaukee Academy of Science       1064</span></span>
+<span><span class="co">#&gt; 11     2019                 Milwaukee Academy of Science       1132</span></span>
+<span><span class="co">#&gt; 12     2020                 Milwaukee Academy of Science       1220</span></span>
+<span><span class="co">#&gt; 13     2021                 Milwaukee Academy of Science       1266</span></span>
+<span><span class="co">#&gt; 14     2022                 Milwaukee Academy of Science       1349</span></span>
+<span><span class="co">#&gt; 15     2018                 Milwaukee Collegiate Academy        287</span></span>
+<span><span class="co">#&gt; 16     2019                 Milwaukee Collegiate Academy        320</span></span>
+<span><span class="co">#&gt; 17     2018           Milwaukee Math and Science Academy        307</span></span>
+<span><span class="co">#&gt; 18     2019           Milwaukee Math and Science Academy        294</span></span>
+<span><span class="co">#&gt; 19     2020           Milwaukee Math and Science Academy        222</span></span>
+<span><span class="co">#&gt; 20     2021           Milwaukee Math and Science Academy        203</span></span>
+<span><span class="co">#&gt; 21     2022           Milwaukee Math and Science Academy        201</span></span>
+<span><span class="co">#&gt; 22     2024      Milwaukee Math and Science Academy Inc.        244</span></span>
+<span><span class="co">#&gt; 23     2023     Milwaukee Math and Science Academy, Inc.        231</span></span>
+<span><span class="co">#&gt; 24     2018            Milwaukee Scholars Charter School        642</span></span>
+<span><span class="co">#&gt; 25     2019            Milwaukee Scholars Charter School        724</span></span>
+<span><span class="co">#&gt; 26     2020            Milwaukee Scholars Charter School        707</span></span>
+<span><span class="co">#&gt; 27     2021            Milwaukee Scholars Charter School        732</span></span>
+<span><span class="co">#&gt; 28     2022            Milwaukee Scholars Charter School        717</span></span>
+<span><span class="co">#&gt; 29     2024        Milwaukee Scholars Charter School Inc        769</span></span>
+<span><span class="co">#&gt; 30     2023      Milwaukee Scholars Charter School, Inc.        670</span></span>
+<span><span class="co">#&gt; 31     2024   Milwaukee Science Education Consortium Inc       1404</span></span>
+<span><span class="co">#&gt; 32     2023 Milwaukee Science Education Consortium, Inc.       1401</span></span>
+<span><span class="co">#&gt; 33     2018                              South Milwaukee       3165</span></span>
+<span><span class="co">#&gt; 34     2019                              South Milwaukee       3062</span></span>
+<span><span class="co">#&gt; 35     2020                              South Milwaukee       3021</span></span>
+<span><span class="co">#&gt; 36     2021                              South Milwaukee       2819</span></span>
+<span><span class="co">#&gt; 37     2022                              South Milwaukee       2863</span></span>
+<span><span class="co">#&gt; 38     2023                              South Milwaukee       2773</span></span>
+<span><span class="co">#&gt; 39     2024                              South Milwaukee       2783</span></span>
+<span><span class="co">#&gt; 40     2018                    West Allis-West Milwaukee       8714</span></span>
+<span><span class="co">#&gt; 41     2019                    West Allis-West Milwaukee       8240</span></span>
+<span><span class="co">#&gt; 42     2020                    West Allis-West Milwaukee       8020</span></span>
+<span><span class="co">#&gt; 43     2021                    West Allis-West Milwaukee       7418</span></span>
+<span><span class="co">#&gt; 44     2022                    West Allis-West Milwaukee       7347</span></span>
+<span><span class="co">#&gt; 45     2023                    West Allis-West Milwaukee       7095</span></span>
+<span><span class="co">#&gt; 46     2024                    West Allis-West Milwaukee       6938</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
@@ -263,13 +368,19 @@ program<a class="anchor" aria-label="anchor" href="#wisconsin-has-a-strong-4k-fo
 <p>Wisconsin’s 4K program enrolls tens of thousands of four-year-olds,
 reflecting the state’s investment in early childhood education.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">grade_breakdown</span> <span class="op">&lt;-</span> <span class="va">enr_2025</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">grade_breakdown</span> <span class="op">&lt;-</span> <span class="va">enr_2024</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_state</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>,</span>
 <span>         <span class="va">grade_level</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PK4"</span>, <span class="st">"PK"</span>, <span class="st">"K"</span>, <span class="st">"01"</span>, <span class="st">"09"</span>, <span class="st">"12"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">grade_level</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">grade_level</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PK4"</span>, <span class="st">"PK"</span>, <span class="st">"K"</span>, <span class="st">"01"</span>, <span class="st">"09"</span>, <span class="st">"12"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">grade_breakdown</span></span></code></pre></div>
+<span><span class="va">grade_breakdown</span></span>
+<span><span class="co">#&gt;   grade_level n_students</span></span>
+<span><span class="co">#&gt; 1          PK       6363</span></span>
+<span><span class="co">#&gt; 2           K      51787</span></span>
+<span><span class="co">#&gt; 3          01      53983</span></span>
+<span><span class="co">#&gt; 4          09      65035</span></span>
+<span><span class="co">#&gt; 5          12      64957</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
@@ -278,7 +389,7 @@ reflecting the state’s investment in early childhood education.</p>
 <p>Wisconsin has hundreds of small rural districts, many in the state’s
 famous dairy farming regions. Most have fewer than 1,000 students.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">size_distribution</span> <span class="op">&lt;-</span> <span class="va">enr_2025</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">size_distribution</span> <span class="op">&lt;-</span> <span class="va">enr_2024</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>size_category <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
 <span>    <span class="va">n_students</span> <span class="op">&lt;</span> <span class="fl">500</span> <span class="op">~</span> <span class="st">"Under 500"</span>,</span>
@@ -293,7 +404,14 @@ famous dairy farming regions. Most have fewer than 1,000 students.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">size_category</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">size_distribution</span></span></code></pre></div>
+<span><span class="va">size_distribution</span></span>
+<span><span class="co">#&gt;   size_category   n  pct</span></span>
+<span><span class="co">#&gt; 1     Under 500 136 30.3</span></span>
+<span><span class="co">#&gt; 2       500-999 124 27.6</span></span>
+<span><span class="co">#&gt; 3   1,000-2,499 108 24.1</span></span>
+<span><span class="co">#&gt; 4   2,500-4,999  50 11.1</span></span>
+<span><span class="co">#&gt; 5   5,000-9,999  23  5.1</span></span>
+<span><span class="co">#&gt; 6       10,000+   8  1.8</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
@@ -302,13 +420,19 @@ famous dairy farming regions. Most have fewer than 1,000 students.</p>
 <p>Green Bay Area Public Schools is the largest district in northeastern
 Wisconsin, serving the region’s industrial and shipping hub.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fox_valley</span> <span class="op">&lt;-</span> <span class="va">enr_2025</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">fox_valley</span> <span class="op">&lt;-</span> <span class="va">enr_2024</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
 <span>         <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"Green Bay|Appleton|Oshkosh|Fond du Lac"</span>, <span class="va">district_name</span>, ignore.case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fox_valley</span></span></code></pre></div>
+<span><span class="va">fox_valley</span></span>
+<span><span class="co">#&gt;           district_name n_students</span></span>
+<span><span class="co">#&gt; 1 Green Bay Area Public      18579</span></span>
+<span><span class="co">#&gt; 2         Appleton Area      15230</span></span>
+<span><span class="co">#&gt; 3          Oshkosh Area       9113</span></span>
+<span><span class="co">#&gt; 4           Fond du Lac       6419</span></span>
+<span><span class="co">#&gt; 5     North Fond du Lac       1555</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
@@ -323,7 +447,15 @@ communities.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">n_students</span>, <span class="va">pct</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">pct</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">hispanic_trend</span></span></code></pre></div>
+<span><span class="va">hispanic_trend</span></span>
+<span><span class="co">#&gt;   end_year n_students  pct</span></span>
+<span><span class="co">#&gt; 1     2018     103384 12.0</span></span>
+<span><span class="co">#&gt; 2     2019     105863 12.3</span></span>
+<span><span class="co">#&gt; 3     2020     107448 12.6</span></span>
+<span><span class="co">#&gt; 4     2021     106239 12.8</span></span>
+<span><span class="co">#&gt; 5     2022     109106 13.2</span></span>
+<span><span class="co">#&gt; 6     2023     111830 13.6</span></span>
+<span><span class="co">#&gt; 7     2024     114020 14.0</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
