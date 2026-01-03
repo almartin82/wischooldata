@@ -4,10 +4,10 @@
 \alias{get_wi_column_map}
 \title{Get column mappings for Wisconsin enrollment data}
 \usage{
-get_wi_column_map(era = "wisedash_modern")
+get_wi_column_map(era = "wisedash")
 }
 \arguments{
-\item{era}{Data era ("winss", "wisedash_early", "wisedash_modern")}
+\item{era}{Data era ("published", "wisedash")}
 }
 \value{
 Named list of column mappings
