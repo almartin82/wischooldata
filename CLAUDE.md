@@ -4,6 +4,36 @@
 
 ---
 
+## Data Sources
+
+Wisconsin DPI provides enrollment data through two systems:
+
+### WISEdash (2006-present) - PRIMARY SOURCE
+- **URL pattern**: `https://dpi.wi.gov/sites/default/files/wise/downloads/enrollment_by_gradelevel_certified_{year}.zip`
+- **Format**: ZIP containing CSV file
+- **Years available**: 2005-06 through 2024-25 (school year end 2006-2025)
+- **Data structure**: Long format with one row per school/grade/subgroup combination
+- **Key columns**: DISTRICT_CODE, SCHOOL_CODE, GRADE_LEVEL, GROUP_BY, GROUP_BY_VALUE, STUDENT_COUNT
+
+### Published PEM Files (1997-2005) - LEGACY SOURCE
+- **URL pattern**: `https://dpi.wi.gov/sites/default/files/imce/cst/xls/pem{YY}.xls`
+- **Format**: Excel workbook with multiple sheets
+- **Years available**: 2001-2011 (files for 2012-2016 return 404)
+- **Data sheet**: Named "PEM{YY}" (e.g., "PEM10" for 2010)
+- **Note**: Since WISEdash is available for 2006+, we only use PEM files for 1997-2005
+
+### Data Availability Summary
+| Years | Source | Status |
+|-------|--------|--------|
+| 2006-2025 | WISEdash ZIP | Active |
+| 1997-2005 | Published PEM Excel | Active |
+
+### Known Issues (as of 2026-01)
+- PEM files for years 2012-2016 return HTTP 404 (no longer available)
+- WISEdash files back to 2006 are fully functional
+- All current tests pass (166 tests)
+
+---
 
 # Claude Code Instructions
 

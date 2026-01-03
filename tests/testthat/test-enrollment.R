@@ -27,24 +27,20 @@ test_that("get_available_years returns valid range", {
 })
 
 test_that("get_data_era returns correct era for each year range", {
-  # WINSS era (1997-2005)
-  expect_equal(get_data_era(1997), "winss")
-  expect_equal(get_data_era(2000), "winss")
-  expect_equal(get_data_era(2005), "winss")
+  # Published era (1997-2005)
+  expect_equal(get_data_era(1997), "published")
+  expect_equal(get_data_era(2000), "published")
+  expect_equal(get_data_era(2005), "published")
 
-
-  # WISEdash early era (2006-2015)
-  expect_equal(get_data_era(2006), "wisedash_early")
-  expect_equal(get_data_era(2010), "wisedash_early")
-  expect_equal(get_data_era(2015), "wisedash_early")
-
-  # WISEdash modern era (2016+)
-  expect_equal(get_data_era(2016), "wisedash_modern")
-  expect_equal(get_data_era(2020), "wisedash_modern")
-  expect_equal(get_data_era(2024), "wisedash_modern")
+  # WISEdash era (2006+)
+  expect_equal(get_data_era(2006), "wisedash")
+  expect_equal(get_data_era(2010), "wisedash")
+  expect_equal(get_data_era(2015), "wisedash")
+  expect_equal(get_data_era(2016), "wisedash")
+  expect_equal(get_data_era(2020), "wisedash")
+  expect_equal(get_data_era(2024), "wisedash")
 
   # Error for invalid year
-
   expect_error(get_data_era(1990), "not available before 1997")
 })
 
@@ -81,18 +77,18 @@ test_that("cache functions work correctly", {
 })
 
 test_that("get_wi_column_map returns expected structure", {
-  # Test modern era
-  map_modern <- get_wi_column_map("wisedash_modern")
-  expect_true(is.list(map_modern))
-  expect_true("district_code" %in% names(map_modern))
-  expect_true("school_code" %in% names(map_modern))
-  expect_true("student_count" %in% names(map_modern))
+  # Test WISEdash era
+  map_wisedash <- get_wi_column_map("wisedash")
+  expect_true(is.list(map_wisedash))
+  expect_true("district_code" %in% names(map_wisedash))
+  expect_true("school_code" %in% names(map_wisedash))
+  expect_true("student_count" %in% names(map_wisedash))
 
-  # Test legacy era
-  map_legacy <- get_wi_column_map("winss")
-  expect_true(is.list(map_legacy))
-  expect_true("district_code" %in% names(map_legacy))
-  expect_true("grade_k" %in% names(map_legacy))
+  # Test published era
+  map_published <- get_wi_column_map("published")
+  expect_true(is.list(map_published))
+  expect_true("district_code" %in% names(map_published))
+  expect_true("grade" %in% names(map_published))
 })
 
 # Integration tests (require network access)
@@ -123,17 +119,20 @@ test_that("fetch_enr downloads and processes WISEdash data (modern era)", {
   expect_true(state_total < 1500000)
 })
 
-test_that("fetch_enr handles WISEdash early era", {
+test_that("fetch_enr handles WISEdash data for 2010", {
   skip_on_cran()
   skip_if_offline()
 
-  # Test an early WISEdash year (published Excel)
+  # Test year 2010 (uses WISEdash ZIP/CSV files)
   result <- fetch_enr(2010, tidy = FALSE, use_cache = FALSE)
 
   expect_true(is.data.frame(result))
   expect_true("district_id" %in% names(result))
   expect_true("type" %in% names(result))
   expect_true(nrow(result) > 0)
+
+  # Verify we get reasonable data
+  expect_true("District" %in% result$type || "Campus" %in% result$type)
 })
 
 test_that("tidy_enr produces correct long format", {
@@ -196,19 +195,19 @@ test_that("fetch_enr_multi combines years correctly", {
   expect_true("n_students" %in% names(result))
 })
 
-test_that("output schema is consistent across eras", {
+test_that("output schema is consistent across years", {
   skip_on_cran()
   skip_if_offline()
 
-  # Fetch from modern and early eras
+  # Fetch from different years (all use WISEdash since 2006+)
   modern <- fetch_enr(2023, tidy = FALSE, use_cache = TRUE)
-  early <- fetch_enr(2010, tidy = FALSE, use_cache = TRUE)
+  older <- fetch_enr(2010, tidy = FALSE, use_cache = TRUE)
 
   # Core columns should be present in both
   core_cols <- c("end_year", "type", "district_id", "row_total")
 
   expect_true(all(core_cols %in% names(modern)))
-  expect_true(all(core_cols %in% names(early)))
+  expect_true(all(core_cols %in% names(older)))
 })
 
 test_that("enr_grade_aggs creates correct aggregates", {
