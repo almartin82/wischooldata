@@ -3,9 +3,9 @@
 \docType{package}
 \name{wischooldata-package}
 \alias{wischooldata-package}
-\title{wischooldata: Fetch and Process Wisconsin School Data}
+\title{wischooldata: Wisconsin School Data}
 \description{
-Downloads and processes school data from the Wisconsin Department of Public Instruction (DPI). Provides functions for fetching enrollment data from WISEdash and historical WINSS data files, and transforming it into tidy format for analysis. Covers enrollment data from 1996-97 through the present.
+A simple, consistent interface for accessing Wisconsin school data in Python and R.
 
 An R package for fetching and analyzing Wisconsin public school enrollment
 data from the Wisconsin Department of Public Instruction (DPI).
