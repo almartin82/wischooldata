@@ -41,7 +41,7 @@ get_available_years <- function() {
   # Published Excel data: 1997-2016
   # WISEdash data: 2006-present (overlaps)
   # Effective range: 1997-current
-  1997:2025
+  1997:2024
 }
 
 
