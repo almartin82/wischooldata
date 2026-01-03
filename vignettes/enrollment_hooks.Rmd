@@ -40,7 +40,7 @@ This vignette explores Wisconsin's public school enrollment data, surfacing key 
 Wisconsin public schools serve a substantial student population, with enrollment spread across urban centers and rural dairy country alike.
 
 ```{r statewide-data}
-enr <- fetch_enr_multi(2018:2025)
+enr <- fetch_enr_multi(2018:2024)
 
 state_totals <- enr |>
   filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
@@ -57,7 +57,7 @@ ggplot(state_totals, aes(x = end_year, y = n_students)) +
   geom_point(size = 3, color = "#C5050C") +
   scale_y_continuous(labels = scales::comma, limits = c(0, NA)) +
   labs(
-    title = "Wisconsin Public School Enrollment (2018-2025)",
+    title = "Wisconsin Public School Enrollment (2018-2024)",
     subtitle = "Tracking enrollment trends across the Badger State",
     x = "School Year (ending)",
     y = "Total Enrollment"
@@ -71,9 +71,9 @@ ggplot(state_totals, aes(x = end_year, y = n_students)) +
 Milwaukee Public Schools is by far the largest district, serving over 70,000 students---more than the next five districts combined.
 
 ```{r top-districts-data}
-enr_2025 <- fetch_enr(2025)
+enr_2024 <- fetch_enr(2024)
 
-top_10 <- enr_2025 |>
+top_10 <- enr_2024 |>
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
   arrange(desc(n_students)) |>
   head(10) |>
@@ -89,7 +89,7 @@ top_10 |>
   geom_col(fill = "#C5050C") +
   scale_x_continuous(labels = scales::comma) +
   labs(
-    title = "Wisconsin's 10 Largest School Districts (2025)",
+    title = "Wisconsin's 10 Largest School Districts (2024)",
     x = "Total Enrollment",
     y = NULL
   )
@@ -102,7 +102,7 @@ top_10 |>
 Milwaukee Public Schools is majority Black and Hispanic, while the state as a whole remains predominantly white---a stark urban-rural divide.
 
 ```{r demographics-data}
-demographics <- enr_2025 |>
+demographics <- enr_2024 |>
   filter(is_state, grade_level == "TOTAL",
          subgroup %in% c("hispanic", "white", "black", "asian", "multiracial", "native_american")) |>
   mutate(pct = round(pct * 100, 1)) |>
@@ -121,7 +121,7 @@ demographics |>
   scale_x_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.15))) +
   scale_fill_brewer(palette = "Set2") +
   labs(
-    title = "Wisconsin Student Demographics (2025)",
+    title = "Wisconsin Student Demographics (2024)",
     subtitle = "Statewide racial/ethnic composition",
     x = "Number of Students",
     y = NULL
@@ -135,7 +135,7 @@ demographics |>
 Wisconsin divides into 12 Cooperative Educational Service Agencies (CESAs) that provide support services to districts. Enrollment varies widely by region.
 
 ```{r regional-data}
-cesa_totals <- enr_2025 |>
+cesa_totals <- enr_2024 |>
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
          !is.na(cesa)) |>
   group_by(cesa) |>
@@ -156,7 +156,7 @@ cesa_totals |>
   geom_col(fill = "#282728") +
   scale_x_continuous(labels = scales::comma) +
   labs(
-    title = "Enrollment by CESA Region (2025)",
+    title = "Enrollment by CESA Region (2024)",
     subtitle = "Wisconsin's 12 Cooperative Educational Service Agencies",
     x = "Total Enrollment",
     y = "CESA"
@@ -172,13 +172,13 @@ While Milwaukee Public Schools has declined, suburban districts like Waukesha, E
 ```{r growth-data}
 growth <- enr |>
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
-         end_year %in% c(2018, 2025)) |>
+         end_year %in% c(2018, 2024)) |>
   group_by(district_id, district_name) |>
   filter(n() == 2) |>
   summarize(
     y2018 = n_students[end_year == 2018],
-    y2025 = n_students[end_year == 2025],
-    pct_change = round((y2025 / y2018 - 1) * 100, 1),
+    y2024 = n_students[end_year == 2024],
+    pct_change = round((y2024 / y2018 - 1) * 100, 1),
     .groups = "drop"
   ) |>
   filter(y2018 > 5000) |>
@@ -196,7 +196,7 @@ growth |>
   geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
   scale_fill_manual(values = c("TRUE" = "#0479A8", "FALSE" = "#C5050C")) +
   labs(
-    title = "Enrollment Change in Large Districts (2018-2025)",
+    title = "Enrollment Change in Large Districts (2018-2024)",
     subtitle = "Districts with 5,000+ students in 2018",
     x = "Percent Change",
     y = NULL
@@ -229,7 +229,7 @@ milwaukee_summary
 Wisconsin's 4K program enrolls tens of thousands of four-year-olds, reflecting the state's investment in early childhood education.
 
 ```{r four-k}
-grade_breakdown <- enr_2025 |>
+grade_breakdown <- enr_2024 |>
   filter(is_state, subgroup == "total_enrollment",
          grade_level %in% c("PK4", "PK", "K", "01", "09", "12")) |>
   select(grade_level, n_students) |>
@@ -245,7 +245,7 @@ grade_breakdown
 Wisconsin has hundreds of small rural districts, many in the state's famous dairy farming regions. Most have fewer than 1,000 students.
 
 ```{r small-districts}
-size_distribution <- enr_2025 |>
+size_distribution <- enr_2024 |>
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
   mutate(size_category = case_when(
     n_students < 500 ~ "Under 500",
@@ -270,7 +270,7 @@ size_distribution
 Green Bay Area Public Schools is the largest district in northeastern Wisconsin, serving the region's industrial and shipping hub.
 
 ```{r green-bay}
-fox_valley <- enr_2025 |>
+fox_valley <- enr_2024 |>
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
          grepl("Green Bay|Appleton|Oshkosh|Fond du Lac", district_name, ignore.case = TRUE)) |>
   select(district_name, n_students) |>
