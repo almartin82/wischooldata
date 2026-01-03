@@ -6,8 +6,11 @@
 # Wisconsin Department of Public Instruction (DPI).
 #
 # Data sources:
-# - Published Excel files (1997-2016): Direct download from DPI
+# - Published Excel files (1997-2005): Direct download from DPI (PEM files)
 # - WISEdash ZIP/CSV files (2006-present): Download from WISEdash data files
+#
+# NOTE: PEM files for 2012-2016 no longer exist on DPI website (404).
+# WISEdash files are available back to 2006, so we use those for 2006+.
 #
 # Wisconsin ID System:
 # - District Code: 4 digits (e.g., 3619 for Madison Metropolitan)
@@ -40,11 +43,11 @@ get_raw_enr <- function(end_year) {
   # Determine which download function to use based on era
   era <- get_data_era(end_year)
 
-  if (era == "wisedash_modern") {
-    # 2016+ uses WISEdash ZIP/CSV files
+  if (era == "wisedash") {
+    # 2006+ uses WISEdash ZIP/CSV files
     df <- download_wisedash_enrollment(end_year)
   } else {
-    # 1997-2015 uses published Excel files
+    # 1997-2005 uses published Excel files (PEM files)
     df <- download_published_enrollment(end_year)
   }
 
@@ -229,13 +232,36 @@ download_published_enrollment <- function(end_year) {
   })
 
   # Read the Excel file
-  # Try to determine if there are multiple sheets
+  # PEM files have multiple sheets; data is in the sheet named "PEM{year}"
   sheets <- readxl::excel_sheets(temp_file)
 
-  # Read the first sheet (usually contains the main data)
+  # Find the data sheet (named "PEM{year}" e.g., "PEM10" for 2010)
+  data_sheet <- grep(paste0("^PEM", year_suffix, "$"), sheets, value = TRUE,
+                     ignore.case = TRUE)
+
+  if (length(data_sheet) == 0) {
+    # Try alternate pattern (just look for PEM followed by digits)
+    data_sheet <- grep("^PEM[0-9]+$", sheets, value = TRUE, ignore.case = TRUE)
+  }
+
+  if (length(data_sheet) == 0) {
+    # Fall back to first non-metadata sheet
+    meta_sheets <- c("Disclaimer", "Data Changes", "Data Abbreviations",
+                     "Locale Code Definitions")
+    data_sheets <- setdiff(sheets, meta_sheets)
+    if (length(data_sheets) > 0) {
+      data_sheet <- data_sheets[1]
+    } else {
+      stop(paste("Could not find data sheet in PEM file. Available sheets:",
+                 paste(sheets, collapse = ", ")))
+    }
+  }
+
+  message(paste("  Reading sheet:", data_sheet[1]))
+
   df <- readxl::read_excel(
     temp_file,
-    sheet = 1,
+    sheet = data_sheet[1],
     col_types = "text"
   )
 
@@ -251,12 +277,12 @@ download_published_enrollment <- function(end_year) {
 #' Returns a list mapping Wisconsin DPI column names to standardized names.
 #' Column names vary by era and file type.
 #'
-#' @param era Data era ("winss", "wisedash_early", "wisedash_modern")
+#' @param era Data era ("published", "wisedash")
 #' @return Named list of column mappings
 #' @keywords internal
-get_wi_column_map <- function(era = "wisedash_modern") {
+get_wi_column_map <- function(era = "wisedash") {
 
-  if (era == "wisedash_modern") {
+  if (era == "wisedash") {
     # WISEdash CSV columns (2016+)
     list(
       # Identifiers
@@ -282,42 +308,36 @@ get_wi_column_map <- function(era = "wisedash_modern") {
       percent_of_group = c("PERCENT_OF_GROUP", "Percent of Group")
     )
   } else {
-    # Published Excel columns (1997-2015)
-    # PEM file structure varies but generally has:
+    # Published Excel columns (1997-2005)
+    # PEM files have columns like:
+    # District, Dist Code, Dist No., Sch Code, School, County Name, CESA, Grade, etc.
+    # The data is in long format (one row per grade) with ethnicity columns
     list(
-      district_code = c("DIST", "District", "DISTRICT", "Dist Code"),
-      district_name = c("District Name", "DISTRICT NAME", "DistName"),
-      school_code = c("SCHOOL", "School", "SCHL", "School Code"),
-      school_name = c("School Name", "SCHOOL NAME", "SchName"),
-      county = c("County", "COUNTY", "County Name"),
+      # District columns
+      district_code = c("Dist Code", "Dist No.", "DIST", "District Code"),
+      district_name = c("District", "District Name", "DISTRICT NAME"),
+
+      # School columns
+      school_code = c("Sch Code", "School Code", "SCHOOL", "SCHL"),
+      school_name = c("School", "School Name", "SCHOOL NAME"),
+
+      # Location columns
+      county = c("County Name", "County", "COUNTY"),
       cesa = c("CESA", "Cesa"),
 
-      # Grade columns
-      grade_pk = c("PK", "Pre-K", "PRE-K", "4K"),
-      grade_k = c("K", "KG", "KINDER"),
-      grade_01 = c("G1", "1", "GR01", "Grade 1"),
-      grade_02 = c("G2", "2", "GR02", "Grade 2"),
-      grade_03 = c("G3", "3", "GR03", "Grade 3"),
-      grade_04 = c("G4", "4", "GR04", "Grade 4"),
-      grade_05 = c("G5", "5", "GR05", "Grade 5"),
-      grade_06 = c("G6", "6", "GR06", "Grade 6"),
-      grade_07 = c("G7", "7", "GR07", "Grade 7"),
-      grade_08 = c("G8", "8", "GR08", "Grade 8"),
-      grade_09 = c("G9", "9", "GR09", "Grade 9"),
-      grade_10 = c("G10", "10", "GR10", "Grade 10"),
-      grade_11 = c("G11", "11", "GR11", "Grade 11"),
-      grade_12 = c("G12", "12", "GR12", "Grade 12"),
-      total = c("TOTAL", "Total", "TOT", "All Grades"),
+      # Grade columns (in PEM files, grade is a single column, not wide format)
+      grade = c("Grade", "Gr. Cat.", "GRADE"),
 
-      # Demographics
-      male = c("M", "Male", "MALE"),
-      female = c("F", "Female", "FEMALE"),
-      white = c("White", "WHITE", "W"),
-      black = c("Black", "BLACK", "B", "Afr Am", "African American"),
-      hispanic = c("Hispanic", "HISPANIC", "H", "Hisp"),
-      asian = c("Asian", "ASIAN", "A"),
-      native_american = c("Am Ind", "American Indian", "AM IND", "Native American"),
-      pacific_islander = c("Pac Isl", "Pacific Islander", "PACIFIC"),
+      # Total column
+      total = c("TOTAL", "Total", "TOT"),
+
+      # Ethnicity columns (these are wide in the PEM files)
+      white = c("White (not Hispanic)", "White", "WHITE"),
+      black = c("Black (not Hispanic)", "Black", "BLACK", "Afr Am"),
+      hispanic = c("Hispanic", "HISPANIC", "Hisp"),
+      asian = c("Asian/Pacific Islander", "Asian", "ASIAN"),
+      native_american = c("American Indian/ Alaskan Native", "Am Ind", "American Indian"),
+      pacific_islander = c("Pacific Islander", "Pac Isl", "PACIFIC"),
       multiracial = c("Two or More", "TWO OR MORE", "Multi")
     )
   }

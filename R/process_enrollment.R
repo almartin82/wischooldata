@@ -24,7 +24,7 @@ process_enr <- function(raw_data, end_year) {
 
   era <- get_data_era(end_year)
 
-  if (era == "wisedash_modern") {
+  if (era == "wisedash") {
     result <- process_wisedash_enr(raw_data, end_year)
   } else {
     result <- process_published_enr(raw_data, end_year)
