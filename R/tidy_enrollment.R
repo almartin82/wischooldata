@@ -161,7 +161,7 @@ id_enr_aggs <- function(df) {
       is_campus = type == "Campus",
 
       # Charter detection - based on charter_flag column
-      is_charter = if ("charter_flag" %in% names(.)) {
+      is_charter = if ("charter_flag" %in% names(df)) {
         !is.na(charter_flag) & charter_flag %in% c("Y", "Yes", "1", "TRUE", "true")
       } else {
         FALSE
