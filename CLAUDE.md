@@ -11,7 +11,7 @@ Wisconsin DPI provides enrollment data through two systems:
 ### WISEdash (2006-present) - PRIMARY SOURCE
 - **URL pattern**: `https://dpi.wi.gov/sites/default/files/wise/downloads/enrollment_by_gradelevel_certified_{year}.zip`
 - **Format**: ZIP containing CSV file
-- **Years available**: 2005-06 through 2024-25 (school year end 2006-2025)
+- **Years available**: 2005-06 through 2023-24 (school year end 2006-2024)
 - **Data structure**: Long format with one row per school/grade/subgroup combination
 - **Key columns**: DISTRICT_CODE, SCHOOL_CODE, GRADE_LEVEL, GROUP_BY, GROUP_BY_VALUE, STUDENT_COUNT
 
@@ -25,7 +25,7 @@ Wisconsin DPI provides enrollment data through two systems:
 ### Data Availability Summary
 | Years | Source | Status |
 |-------|--------|--------|
-| 2006-2025 | WISEdash ZIP | Active |
+| 2006-2024 | WISEdash ZIP | Active |
 | 1997-2005 | Published PEM Excel | Active |
 
 ### Known Issues (as of 2026-01)
