@@ -321,6 +321,22 @@ milwaukee_summary
 #> 46     2024                    West Allis-West Milwaukee       6938
 ```
 
+``` r
+milwaukee_summary |>
+  ggplot(aes(x = end_year, y = n_students)) +
+  geom_line(linewidth = 1.2, color = "#C5050C") +
+  geom_point(size = 3, color = "#C5050C") +
+  scale_y_continuous(labels = scales::comma, limits = c(0, NA)) +
+  labs(
+    title = "Milwaukee Public Schools Enrollment Decline",
+    subtitle = "Annual enrollment 2018-2024",
+    x = "School Year (ending)",
+    y = "Total Enrollment"
+  )
+```
+
+![](enrollment_hooks_files/figure-html/milwaukee-chart-1.png)
+
 ------------------------------------------------------------------------
 
 ## 7. Wisconsin has a strong 4K (four-year-old kindergarten) program
@@ -343,6 +359,23 @@ grade_breakdown
 #> 4          09      65035
 #> 5          12      64957
 ```
+
+``` r
+grade_breakdown |>
+  mutate(grade_level = factor(grade_level, levels = c("PK4", "PK", "K", "01", "09", "12"))) |>
+  ggplot(aes(x = grade_level, y = n_students, fill = grade_level == "PK4")) +
+  geom_col(show.legend = FALSE) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c("TRUE" = "#C5050C", "FALSE" = "#282728")) +
+  labs(
+    title = "Wisconsin Enrollment by Grade Level (2024)",
+    subtitle = "4K program highlighted in red",
+    x = "Grade Level",
+    y = "Number of Students"
+  )
+```
+
+![](enrollment_hooks_files/figure-html/grade-chart-1.png)
 
 ------------------------------------------------------------------------
 
@@ -377,6 +410,24 @@ size_distribution
 #> 6       10,000+   8  1.8
 ```
 
+``` r
+size_distribution |>
+  ggplot(aes(x = size_category, y = n, fill = size_category %in% c("Under 500", "500-999"))) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = paste0(n, " (", pct, "%)")), vjust = -0.3, size = 3.5) +
+  scale_fill_manual(values = c("TRUE" = "#C5050C", "FALSE" = "#282728")) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(
+    title = "Wisconsin Districts by Size (2024)",
+    subtitle = "Small rural districts (under 1,000 students) highlighted",
+    x = "District Size Category",
+    y = "Number of Districts"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+![](enrollment_hooks_files/figure-html/size-chart-1.png)
+
 ------------------------------------------------------------------------
 
 ## 9. Green Bay anchors northeastern Wisconsin
@@ -399,6 +450,23 @@ fox_valley
 #> 4           Fond du Lac       6419
 #> 5     North Fond du Lac       1555
 ```
+
+``` r
+fox_valley |>
+  mutate(district_name = forcats::fct_reorder(district_name, n_students)) |>
+  ggplot(aes(x = n_students, y = district_name, fill = grepl("Green Bay", district_name))) +
+  geom_col(show.legend = FALSE) +
+  scale_x_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c("TRUE" = "#203731", "FALSE" = "#FFB612")) +
+  labs(
+    title = "Northeastern Wisconsin's Largest Districts (2024)",
+    subtitle = "Green Bay highlighted as regional anchor",
+    x = "Total Enrollment",
+    y = NULL
+  )
+```
+
+![](enrollment_hooks_files/figure-html/fox-valley-chart-1.png)
 
 ------------------------------------------------------------------------
 
@@ -424,6 +492,22 @@ hispanic_trend
 #> 6     2023     111830 13.6
 #> 7     2024     114020 14.0
 ```
+
+``` r
+hispanic_trend |>
+  ggplot(aes(x = end_year, y = n_students)) +
+  geom_line(linewidth = 1.2, color = "#C5050C") +
+  geom_point(size = 3, color = "#C5050C") +
+  scale_y_continuous(labels = scales::comma, limits = c(0, NA)) +
+  labs(
+    title = "Hispanic Student Enrollment Growth in Wisconsin",
+    subtitle = "Fastest-growing demographic group statewide",
+    x = "School Year (ending)",
+    y = "Hispanic Student Enrollment"
+  )
+```
+
+![](enrollment_hooks_files/figure-html/hispanic-chart-1.png)
 
 ------------------------------------------------------------------------
 
