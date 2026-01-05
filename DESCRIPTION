@@ -2,7 +2,9 @@ Package: wischooldata
 Title: Wisconsin School Data
 Version: 0.1.0
 Authors@R:
-    person("Al", "Martin", , "almartin@example.com", role = c("aut", "cre"))
+    person("Al", "Martin", , "almartin@gmail.com", role = c("aut", "cre"))
+Author: Al Martin [aut, cre]
+Maintainer: Al Martin <almartin@gmail.com>
 Description: A simple, consistent interface for accessing Wisconsin
     school data in Python and R.
 License: MIT + file LICENSE
