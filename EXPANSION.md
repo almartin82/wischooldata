@@ -186,7 +186,9 @@ Completed - Not Continuing - Not Completed - Max Age - `*` (suppressed)
     eras
 3.  Create `tidy_grad()` to pivot to long format with subgroups
 4.  Create `fetch_grad()` as main entry point
-5.  Add `get_available_grad_years()` utility
+5.  Add
+    [`get_available_grad_years()`](https://almartin82.github.io/wischooldata/reference/get_available_grad_years.md)
+    utility
 6.  Write comprehensive tests
 
 ### Tidy Output Schema (Proposed)

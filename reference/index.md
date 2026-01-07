@@ -1,6 +1,6 @@
 # Package index
 
-## Fetch Data
+## Fetch Enrollment Data
 
 Download enrollment data from Wisconsin DPI
 
@@ -10,6 +10,17 @@ Download enrollment data from Wisconsin DPI
   : Fetch enrollment data for multiple years
 - [`get_available_years()`](https://almartin82.github.io/wischooldata/reference/get_available_years.md)
   : Get available years for Wisconsin enrollment data
+
+## Fetch Graduation Data
+
+Download graduation rate data from Wisconsin DPI
+
+- [`fetch_graduation()`](https://almartin82.github.io/wischooldata/reference/fetch_graduation.md)
+  : Fetch Wisconsin High School Graduation Rate Data
+- [`fetch_graduation_multi()`](https://almartin82.github.io/wischooldata/reference/fetch_graduation_multi.md)
+  : Fetch Graduation Rate Data for Multiple Years
+- [`get_available_grad_years()`](https://almartin82.github.io/wischooldata/reference/get_available_grad_years.md)
+  : Get Available Graduation Years
 
 ## Process & Tidy
 
