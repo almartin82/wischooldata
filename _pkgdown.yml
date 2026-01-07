@@ -29,12 +29,19 @@ navbar:
         href: articles/enrollment_hooks.html
 
 reference:
-- title: Fetch Data
+- title: Fetch Enrollment Data
   desc: Download enrollment data from Wisconsin DPI
   contents:
   - fetch_enr
   - fetch_enr_multi
   - get_available_years
+
+- title: Fetch Graduation Data
+  desc: Download graduation rate data from Wisconsin DPI
+  contents:
+  - fetch_graduation
+  - fetch_graduation_multi
+  - get_available_grad_years
 
 - title: Process & Tidy
   desc: Transform data into analysis-ready formats

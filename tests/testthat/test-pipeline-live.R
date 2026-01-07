@@ -146,7 +146,8 @@ test_that("Can extract and parse WISEdash CSV from ZIP", {
 
   url <- "https://dpi.wi.gov/sites/default/files/wise/downloads/enrollment_by_gradelevel_certified_2023-24.zip"
   temp_zip <- tempfile(fileext = ".zip")
-  temp_dir <- tempdir()
+  temp_dir <- tempfile()
+dir.create(temp_dir)
 
   httr::GET(url, httr::write_disk(temp_zip, overwrite = TRUE), httr::timeout(120))
 
@@ -181,7 +182,8 @@ test_that("WISEdash CSV has expected columns", {
 
   url <- "https://dpi.wi.gov/sites/default/files/wise/downloads/enrollment_by_gradelevel_certified_2023-24.zip"
   temp_zip <- tempfile(fileext = ".zip")
-  temp_dir <- tempdir()
+  temp_dir <- tempfile()
+dir.create(temp_dir)
 
   httr::GET(url, httr::write_disk(temp_zip, overwrite = TRUE), httr::timeout(120))
   unzip(temp_zip, exdir = temp_dir, overwrite = TRUE)
@@ -209,7 +211,8 @@ test_that("WISEdash data has expected GROUP_BY values", {
 
   url <- "https://dpi.wi.gov/sites/default/files/wise/downloads/enrollment_by_gradelevel_certified_2023-24.zip"
   temp_zip <- tempfile(fileext = ".zip")
-  temp_dir <- tempdir()
+  temp_dir <- tempfile()
+dir.create(temp_dir)
 
   httr::GET(url, httr::write_disk(temp_zip, overwrite = TRUE), httr::timeout(120))
   unzip(temp_zip, exdir = temp_dir, overwrite = TRUE)
@@ -440,7 +443,8 @@ test_that("get_raw_enr data matches independent read", {
   # Verify we can independently read the same data
   url <- "https://dpi.wi.gov/sites/default/files/wise/downloads/enrollment_by_gradelevel_certified_2023-24.zip"
   temp_zip <- tempfile(fileext = ".zip")
-  temp_dir <- tempdir()
+  temp_dir <- tempfile()
+dir.create(temp_dir)
 
   httr::GET(url, httr::write_disk(temp_zip, overwrite = TRUE), httr::timeout(120))
   unzip(temp_zip, exdir = temp_dir, overwrite = TRUE)
