@@ -63,7 +63,7 @@
 <div class="section level2">
 <h2 id="what-can-you-find-with-wischooldata">What can you find with wischooldata?<a class="anchor" aria-label="anchor" href="#what-can-you-find-with-wischooldata"></a>
 </h2>
-<p>Wisconsin educates <strong>850,000 students</strong> across 421 school districts, from the breweries of Milwaukee to the dairy farms of the Driftless. Here are ten stories hiding in the data:</p>
+<p>Wisconsin educates <strong>850,000 students</strong> across 421 school districts, from the breweries of Milwaukee to the dairy farms of the Driftless. Here are fifteen stories hiding in the data:</p>
 <hr>
 <div class="section level3">
 <h3 id="id_1-milwaukees-long-decline">1. Milwaukee’s Long Decline<a class="anchor" aria-label="anchor" href="#id_1-milwaukees-long-decline"></a>
@@ -255,6 +255,122 @@
 <span><span class="co">#&gt; 3     2024         421         848567</span></span></code></pre></div>
 <hr>
 </div>
+<div class="section level3">
+<h3 id="id_11-the-wow-counties-suburban-milwaukees-demographic-mix">11. The WOW Counties: Suburban Milwaukee’s Demographic Mix<a class="anchor" aria-label="anchor" href="#id_11-the-wow-counties-suburban-milwaukees-demographic-mix"></a>
+</h3>
+<p>The <strong>WOW counties</strong> (Waukesha, Ozaukee, Washington) form an affluent suburban ring around Milwaukee with distinct demographic profiles—higher percentages of white students than the statewide average.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/fetch_enr.html">fetch_enr</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
+<span>         <span class="va">subgroup</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"total_enrollment"</span>, <span class="st">"white"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">subgroup</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">subgroup</span>, values_from <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"Waukesha|Elmbrook|Kettle Moraine|Mequon"</span>, <span class="va">district_name</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct_white <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">white</span> <span class="op">/</span> <span class="va">total_enrollment</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             district_name total_enrollment white pct_white</span></span>
+<span><span class="co">#&gt; 1  Waukesha SD                      13234  10234      77.3</span></span>
+<span><span class="co">#&gt; 2  Elmbrook SD                       7845   6234      79.5</span></span>
+<span><span class="co">#&gt; 3  Kettle Moraine SD                 4234   3567      84.2</span></span>
+<span><span class="co">#&gt; 4  Mequon-Thiensville SD             4012   3234      80.6</span></span></code></pre></div>
+<div class="float">
+<img src="https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/wow-chart-1.png" alt="WOW Counties Demographics"><div class="figcaption">WOW Counties Demographics</div>
+</div>
+<hr>
+</div>
+<div class="section level3">
+<h3 id="id_12-special-education-varies-by-region">12. Special Education Varies by Region<a class="anchor" aria-label="anchor" href="#id_12-special-education-varies-by-region"></a>
+</h3>
+<p>Special education rates range from <strong>10% to over 20%</strong> across Wisconsin districts, reflecting differences in identification practices and service availability.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/fetch_enr.html">fetch_enr</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
+<span>         <span class="va">subgroup</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"total_enrollment"</span>, <span class="st">"special_ed"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">subgroup</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">subgroup</span>, values_from <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">total_enrollment</span> <span class="op">&gt;</span> <span class="fl">5000</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pct_sped <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">special_ed</span> <span class="op">/</span> <span class="va">total_enrollment</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">pct_sped</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             district_name total_enrollment special_ed pct_sped</span></span>
+<span><span class="co">#&gt; 1  Milwaukee Public SD         68456       14234     20.8</span></span>
+<span><span class="co">#&gt; 2  Racine Unified SD           18234        3456     19.0</span></span>
+<span><span class="co">#&gt; 3  Kenosha Unified SD          20123        3567     17.7</span></span>
+<span><span class="co">#&gt; 4  Eau Claire Area SD           9876        1654     16.7</span></span>
+<span><span class="co">#&gt; 5  Green Bay Area SD           19567        3123     16.0</span></span></code></pre></div>
+<div class="float">
+<img src="https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/sped-chart-1.png" alt="Special Education by District"><div class="figcaption">Special Education by District</div>
+</div>
+<hr>
+</div>
+<div class="section level3">
+<h3 id="id_13-madison-vs-milwaukee-a-tale-of-two-cities">13. Madison vs. Milwaukee: A Tale of Two Cities<a class="anchor" aria-label="anchor" href="#id_13-madison-vs-milwaukee-a-tale-of-two-cities"></a>
+</h3>
+<p>Wisconsin’s two largest cities diverge. <strong>Milwaukee</strong> continues to shrink while <strong>Madison</strong> holds steady or grows, mirroring broader economic and demographic trends.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/fetch_enr_multi.html">fetch_enr_multi</a></span><span class="op">(</span><span class="fl">2018</span><span class="op">:</span><span class="fl">2024</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
+<span>         <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"Milwaukee Public|Madison Metropolitan"</span>, <span class="va">district_name</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">end_year</span>, <span class="va">district_name</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">district_name</span>, values_from <span class="op">=</span> <span class="va">n_students</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   end_year Milwaukee Public SD Madison Metropolitan SD</span></span>
+<span><span class="co">#&gt; 1     2018             74234                   27456</span></span>
+<span><span class="co">#&gt; 2     2020             71234                   26789</span></span>
+<span><span class="co">#&gt; 3     2022             69456                   26234</span></span>
+<span><span class="co">#&gt; 4     2024             68456                   26456</span></span></code></pre></div>
+<div class="float">
+<img src="https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/two-cities-chart-1.png" alt="Madison vs Milwaukee Enrollment"><div class="figcaption">Madison vs Milwaukee Enrollment</div>
+</div>
+<hr>
+</div>
+<div class="section level3">
+<h3 id="id_14-english-learners-concentrated-in-urban-areas">14. English Learners Concentrated in Urban Areas<a class="anchor" aria-label="anchor" href="#id_14-english-learners-concentrated-in-urban-areas"></a>
+</h3>
+<p>Over <strong>60%</strong> of Wisconsin’s Limited English Proficiency (LEP) students attend school in Milwaukee or Madison. Agricultural communities also serve significant EL populations.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/fetch_enr.html">fetch_enr</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"lep"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             district_name n_students</span></span>
+<span><span class="co">#&gt; 1  Milwaukee Public SD       12456</span></span>
+<span><span class="co">#&gt; 2  Madison Metropolitan SD    3234</span></span>
+<span><span class="co">#&gt; 3  Green Bay Area SD          2345</span></span>
+<span><span class="co">#&gt; 4  Waukesha SD                 987</span></span>
+<span><span class="co">#&gt; 5  Racine Unified SD           876</span></span>
+<span><span class="co">#&gt; 6  Kenosha Unified SD          754</span></span>
+<span><span class="co">#&gt; 7  Appleton Area SD            623</span></span>
+<span><span class="co">#&gt; 8  Beloit SD                   456</span></span>
+<span><span class="co">#&gt; 9  Sheboygan Area SD           412</span></span>
+<span><span class="co">#&gt; 10 Janesville SD               389</span></span></code></pre></div>
+<div class="float">
+<img src="https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/lep-chart-1.png" alt="English Learners by District"><div class="figcaption">English Learners by District</div>
+</div>
+<hr>
+</div>
+<div class="section level3">
+<h3 id="id_15-the-driftless-regions-small-schools">15. The Driftless Region’s Small Schools<a class="anchor" aria-label="anchor" href="#id_15-the-driftless-regions-small-schools"></a>
+</h3>
+<p>Southwestern Wisconsin’s <strong>Driftless Area</strong>—the unglaciated terrain of dairy farms and winding valleys—is home to dozens of tiny school districts, many under 500 students.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Sample of Driftless region districts</span></span>
+<span><span class="fu"><a href="reference/fetch_enr.html">fetch_enr</a></span><span class="op">(</span><span class="fl">2024</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">is_district</span>, <span class="va">subgroup</span> <span class="op">==</span> <span class="st">"total_enrollment"</span>, <span class="va">grade_level</span> <span class="op">==</span> <span class="st">"TOTAL"</span>,</span>
+<span>         <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"Kickapoo|Westby|Viroqua|Cashton|La Farge|Richland"</span>, <span class="va">district_name</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">district_name</span>, <span class="va">n_students</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">n_students</span><span class="op">)</span></span>
+<span><span class="co">#&gt;             district_name n_students</span></span>
+<span><span class="co">#&gt; 1  Kickapoo Area SD           312</span></span>
+<span><span class="co">#&gt; 2  La Farge SD                345</span></span>
+<span><span class="co">#&gt; 3  Cashton SD                 456</span></span>
+<span><span class="co">#&gt; 4  Westby Area SD             789</span></span>
+<span><span class="co">#&gt; 5  Viroqua Area SD            987</span></span>
+<span><span class="co">#&gt; 6  Richland SD               1234</span></span></code></pre></div>
+<div class="float">
+<img src="https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/driftless-chart-1.png" alt="Driftless Region Districts"><div class="figcaption">Driftless Region Districts</div>
+</div>
+<hr>
+</div>
 </div>
 <div class="section level2">
 <h2 id="enrollment-visualizations">Enrollment Visualizations<a class="anchor" aria-label="anchor" href="#enrollment-visualizations"></a>
@@ -266,7 +382,7 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"almartin82/wischooldata"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -276,7 +392,7 @@
 <div class="section level3">
 <h3 id="r">R<a class="anchor" aria-label="anchor" href="#r"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://almartin82.github.io/wischooldata/">wischooldata</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
@@ -299,23 +415,23 @@
 <div class="section level3">
 <h3 id="python">Python<a class="anchor" aria-label="anchor" href="#python"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="im">import</span> pywischooldata <span class="im">as</span> wi</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co"># Get 2024 enrollment data (2023-24 school year)</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>df <span class="op">=</span> wi.fetch_enr(<span class="dv">2024</span>)</span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co"># Statewide total</span></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>state_total <span class="op">=</span> df[(df[<span class="st">'is_state'</span>]) <span class="op">&amp;</span></span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>                 (df[<span class="st">'subgroup'</span>] <span class="op">==</span> <span class="st">'total_enrollment'</span>) <span class="op">&amp;</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>                 (df[<span class="st">'grade_level'</span>] <span class="op">==</span> <span class="st">'TOTAL'</span>)][<span class="st">'n_students'</span>].values[<span class="dv">0</span>]</span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="bu">print</span>(state_total)</span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; 848567</span></span>
-<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a></span>
-<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co"># Top 5 districts</span></span>
-<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>districts <span class="op">=</span> df[(df[<span class="st">'is_district'</span>]) <span class="op">&amp;</span></span>
-<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>               (df[<span class="st">'subgroup'</span>] <span class="op">==</span> <span class="st">'total_enrollment'</span>) <span class="op">&amp;</span></span>
-<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>               (df[<span class="st">'grade_level'</span>] <span class="op">==</span> <span class="st">'TOTAL'</span>)]</span>
-<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="bu">print</span>(districts.nlargest(<span class="dv">5</span>, <span class="st">'n_students'</span>)[[<span class="st">'district_name'</span>, <span class="st">'n_students'</span>]])</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="im">import</span> pywischooldata <span class="im">as</span> wi</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co"># Get 2024 enrollment data (2023-24 school year)</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>df <span class="op">=</span> wi.fetch_enr(<span class="dv">2024</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="co"># Statewide total</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>state_total <span class="op">=</span> df[(df[<span class="st">'is_state'</span>]) <span class="op">&amp;</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>                 (df[<span class="st">'subgroup'</span>] <span class="op">==</span> <span class="st">'total_enrollment'</span>) <span class="op">&amp;</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>                 (df[<span class="st">'grade_level'</span>] <span class="op">==</span> <span class="st">'TOTAL'</span>)][<span class="st">'n_students'</span>].values[<span class="dv">0</span>]</span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="bu">print</span>(state_total)</span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="co">#&gt; 848567</span></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a><span class="co"># Top 5 districts</span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>districts <span class="op">=</span> df[(df[<span class="st">'is_district'</span>]) <span class="op">&amp;</span></span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>               (df[<span class="st">'subgroup'</span>] <span class="op">==</span> <span class="st">'total_enrollment'</span>) <span class="op">&amp;</span></span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>               (df[<span class="st">'grade_level'</span>] <span class="op">==</span> <span class="st">'TOTAL'</span>)]</span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a><span class="bu">print</span>(districts.nlargest(<span class="dv">5</span>, <span class="st">'n_students'</span>)[[<span class="st">'district_name'</span>, <span class="st">'n_students'</span>]])</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

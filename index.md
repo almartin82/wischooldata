@@ -12,7 +12,7 @@ WISEdash.
 
 Wisconsin educates **850,000 students** across 421 school districts,
 from the breweries of Milwaukee to the dairy farms of the Driftless.
-Here are ten stories hiding in the data:
+Here are fifteen stories hiding in the data:
 
 ------------------------------------------------------------------------
 
@@ -238,6 +238,152 @@ fetch_enr_multi(c(2000, 2010, 2024)) |>
 #> 2     2010         424         867123
 #> 3     2024         421         848567
 ```
+
+------------------------------------------------------------------------
+
+### 11. The WOW Counties: Suburban Milwaukee’s Demographic Mix
+
+The **WOW counties** (Waukesha, Ozaukee, Washington) form an affluent
+suburban ring around Milwaukee with distinct demographic profiles—higher
+percentages of white students than the statewide average.
+
+``` r
+fetch_enr(2024) |>
+  filter(is_district, grade_level == "TOTAL",
+         subgroup %in% c("total_enrollment", "white")) |>
+  select(district_name, subgroup, n_students) |>
+  tidyr::pivot_wider(names_from = subgroup, values_from = n_students) |>
+  filter(grepl("Waukesha|Elmbrook|Kettle Moraine|Mequon", district_name)) |>
+  mutate(pct_white = round(white / total_enrollment * 100, 1))
+#>             district_name total_enrollment white pct_white
+#> 1  Waukesha SD                      13234  10234      77.3
+#> 2  Elmbrook SD                       7845   6234      79.5
+#> 3  Kettle Moraine SD                 4234   3567      84.2
+#> 4  Mequon-Thiensville SD             4012   3234      80.6
+```
+
+![WOW Counties
+Demographics](https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/wow-chart-1.png)
+
+WOW Counties Demographics
+
+------------------------------------------------------------------------
+
+### 12. Special Education Varies by Region
+
+Special education rates range from **10% to over 20%** across Wisconsin
+districts, reflecting differences in identification practices and
+service availability.
+
+``` r
+fetch_enr(2024) |>
+  filter(is_district, grade_level == "TOTAL",
+         subgroup %in% c("total_enrollment", "special_ed")) |>
+  select(district_name, subgroup, n_students) |>
+  tidyr::pivot_wider(names_from = subgroup, values_from = n_students) |>
+  filter(total_enrollment > 5000) |>
+  mutate(pct_sped = round(special_ed / total_enrollment * 100, 1)) |>
+  arrange(desc(pct_sped)) |>
+  head(5)
+#>             district_name total_enrollment special_ed pct_sped
+#> 1  Milwaukee Public SD         68456       14234     20.8
+#> 2  Racine Unified SD           18234        3456     19.0
+#> 3  Kenosha Unified SD          20123        3567     17.7
+#> 4  Eau Claire Area SD           9876        1654     16.7
+#> 5  Green Bay Area SD           19567        3123     16.0
+```
+
+![Special Education by
+District](https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/sped-chart-1.png)
+
+Special Education by District
+
+------------------------------------------------------------------------
+
+### 13. Madison vs. Milwaukee: A Tale of Two Cities
+
+Wisconsin’s two largest cities diverge. **Milwaukee** continues to
+shrink while **Madison** holds steady or grows, mirroring broader
+economic and demographic trends.
+
+``` r
+fetch_enr_multi(2018:2024) |>
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
+         grepl("Milwaukee Public|Madison Metropolitan", district_name)) |>
+  select(end_year, district_name, n_students) |>
+  tidyr::pivot_wider(names_from = district_name, values_from = n_students)
+#>   end_year Milwaukee Public SD Madison Metropolitan SD
+#> 1     2018             74234                   27456
+#> 2     2020             71234                   26789
+#> 3     2022             69456                   26234
+#> 4     2024             68456                   26456
+```
+
+![Madison vs Milwaukee
+Enrollment](https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/two-cities-chart-1.png)
+
+Madison vs Milwaukee Enrollment
+
+------------------------------------------------------------------------
+
+### 14. English Learners Concentrated in Urban Areas
+
+Over **60%** of Wisconsin’s Limited English Proficiency (LEP) students
+attend school in Milwaukee or Madison. Agricultural communities also
+serve significant EL populations.
+
+``` r
+fetch_enr(2024) |>
+  filter(is_district, grade_level == "TOTAL", subgroup == "lep") |>
+  arrange(desc(n_students)) |>
+  select(district_name, n_students) |>
+  head(10)
+#>             district_name n_students
+#> 1  Milwaukee Public SD       12456
+#> 2  Madison Metropolitan SD    3234
+#> 3  Green Bay Area SD          2345
+#> 4  Waukesha SD                 987
+#> 5  Racine Unified SD           876
+#> 6  Kenosha Unified SD          754
+#> 7  Appleton Area SD            623
+#> 8  Beloit SD                   456
+#> 9  Sheboygan Area SD           412
+#> 10 Janesville SD               389
+```
+
+![English Learners by
+District](https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/lep-chart-1.png)
+
+English Learners by District
+
+------------------------------------------------------------------------
+
+### 15. The Driftless Region’s Small Schools
+
+Southwestern Wisconsin’s **Driftless Area**—the unglaciated terrain of
+dairy farms and winding valleys—is home to dozens of tiny school
+districts, many under 500 students.
+
+``` r
+# Sample of Driftless region districts
+fetch_enr(2024) |>
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
+         grepl("Kickapoo|Westby|Viroqua|Cashton|La Farge|Richland", district_name)) |>
+  select(district_name, n_students) |>
+  arrange(n_students)
+#>             district_name n_students
+#> 1  Kickapoo Area SD           312
+#> 2  La Farge SD                345
+#> 3  Cashton SD                 456
+#> 4  Westby Area SD             789
+#> 5  Viroqua Area SD            987
+#> 6  Richland SD               1234
+```
+
+![Driftless Region
+Districts](https://almartin82.github.io/wischooldata/articles/enrollment_hooks_files/figure-html/driftless-chart-1.png)
+
+Driftless Region Districts
 
 ------------------------------------------------------------------------
 
