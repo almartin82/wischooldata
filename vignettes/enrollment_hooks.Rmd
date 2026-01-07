@@ -1,24 +1,20 @@
 ---
-title: "10 Insights from Wisconsin School Enrollment Data"
+title: "15 Insights from Wisconsin School Enrollment Data"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{10 Insights from Wisconsin School Enrollment Data}
+  %\VignetteIndexEntry{15 Insights from Wisconsin School Enrollment Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-# Skip execution during R CMD check / CI builds (no network access)
-NOT_CRAN <- identical(Sys.getenv("NOT_CRAN"), "true")
-
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   message = FALSE,
   warning = FALSE,
   fig.width = 8,
-  fig.height = 5,
-  eval = NOT_CRAN
+  fig.height = 5
 )
 ```
 
@@ -370,6 +366,183 @@ hispanic_trend |>
 
 ---
 
+## 11. The WOW Counties: Suburban Milwaukee's Demographic Mix
+
+The WOW counties (Waukesha, Ozaukee, Washington) form an affluent suburban ring around Milwaukee with distinct demographic profiles---higher percentages of white students than the statewide average.
+
+```{r wow-data}
+# Identify WOW-area districts by name patterns
+wow_districts <- enr_2024 |>
+  filter(is_district, grade_level == "TOTAL",
+         subgroup %in% c("total_enrollment", "white")) |>
+  select(district_name, subgroup, n_students) |>
+  pivot_wider(names_from = subgroup, values_from = n_students) |>
+  filter(grepl("Waukesha|Germantown|Cedarburg|Mequon|Hartford|West Bend|Grafton|Slinger|Elmbrook|Kettle Moraine",
+               district_name, ignore.case = TRUE)) |>
+  mutate(pct_white = round(white / total_enrollment * 100, 1)) |>
+  filter(total_enrollment > 1000) |>
+  arrange(desc(pct_white))
+
+wow_districts
+```
+
+```{r wow-chart}
+wow_districts |>
+  mutate(district_name = forcats::fct_reorder(district_name, pct_white)) |>
+  ggplot(aes(x = pct_white, y = district_name)) +
+  geom_col(fill = "#0479A8") +
+  geom_vline(xintercept = 70, linetype = "dashed", color = "gray40") +
+  annotate("text", x = 72, y = 1, label = "State avg ~70%", hjust = 0, size = 3) +
+  labs(
+    title = "White Student Percentage in WOW County Districts",
+    subtitle = "Waukesha-Ozaukee-Washington suburban ring (districts >1,000 students)",
+    x = "Percent White Students",
+    y = NULL
+  )
+```
+
+---
+
+## 12. Special Education Enrollment Varies by Region
+
+Special education rates differ markedly across Wisconsin, with some districts serving twice the proportion of students with disabilities as others.
+
+```{r sped-data}
+sped_rates <- enr_2024 |>
+  filter(is_district, grade_level == "TOTAL",
+         subgroup %in% c("total_enrollment", "special_ed")) |>
+  select(district_name, subgroup, n_students) |>
+  pivot_wider(names_from = subgroup, values_from = n_students) |>
+  filter(total_enrollment > 2000) |>
+  mutate(pct_sped = round(special_ed / total_enrollment * 100, 1)) |>
+  arrange(desc(pct_sped))
+
+sped_summary <- bind_rows(
+  sped_rates |> head(5) |> mutate(group = "Highest"),
+  sped_rates |> tail(5) |> mutate(group = "Lowest")
+)
+
+sped_summary
+```
+
+```{r sped-chart}
+sped_summary |>
+  mutate(district_name = forcats::fct_reorder(district_name, pct_sped)) |>
+  ggplot(aes(x = pct_sped, y = district_name, fill = group)) +
+  geom_col(show.legend = TRUE) +
+  scale_fill_manual(values = c("Highest" = "#C5050C", "Lowest" = "#0479A8")) +
+  labs(
+    title = "Special Education Rates Vary Widely Across Wisconsin",
+    subtitle = "Top 5 and bottom 5 districts with 2,000+ students",
+    x = "Percent Special Education",
+    y = NULL,
+    fill = NULL
+  )
+```
+
+---
+
+## 13. Madison vs. Milwaukee: A Tale of Two Cities
+
+Wisconsin's two largest cities have diverged dramatically. Milwaukee shrinks while Madison grows, reflecting broader economic and demographic shifts.
+
+```{r two-cities-data}
+two_cities <- enr |>
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
+         grepl("Milwaukee Public|Madison Metropolitan", district_name, ignore.case = TRUE)) |>
+  select(end_year, district_name, n_students)
+
+two_cities
+```
+
+```{r two-cities-chart}
+two_cities |>
+  mutate(city = ifelse(grepl("Milwaukee", district_name), "Milwaukee", "Madison")) |>
+  ggplot(aes(x = end_year, y = n_students, color = city)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  scale_y_continuous(labels = scales::comma, limits = c(0, NA)) +
+  scale_color_manual(values = c("Milwaukee" = "#C5050C", "Madison" = "#0479A8")) +
+  labs(
+    title = "Milwaukee vs. Madison Enrollment Trends",
+    subtitle = "Wisconsin's two largest districts (2018-2024)",
+    x = "School Year (ending)",
+    y = "Total Enrollment",
+    color = NULL
+  )
+```
+
+---
+
+## 14. English Learners Concentrated in Urban Areas
+
+Limited English Proficiency (LEP) students are heavily concentrated in a handful of urban districts, with Milwaukee and Madison serving the vast majority.
+
+```{r lep-data}
+lep_districts <- enr_2024 |>
+  filter(is_district, grade_level == "TOTAL",
+         subgroup %in% c("total_enrollment", "lep")) |>
+  select(district_name, subgroup, n_students) |>
+  pivot_wider(names_from = subgroup, values_from = n_students) |>
+  filter(lep > 200) |>
+  mutate(pct_lep = round(lep / total_enrollment * 100, 1)) |>
+  arrange(desc(lep)) |>
+  head(10)
+
+lep_districts
+```
+
+```{r lep-chart}
+lep_districts |>
+  mutate(district_name = forcats::fct_reorder(district_name, lep)) |>
+  ggplot(aes(x = lep, y = district_name)) +
+  geom_col(fill = "#282728") +
+  geom_text(aes(label = paste0(pct_lep, "%")), hjust = -0.1, size = 3) +
+  scale_x_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.15))) +
+  labs(
+    title = "Districts with Most English Learner Students (2024)",
+    subtitle = "Top 10 districts by LEP enrollment (>200 students)",
+    x = "Number of LEP Students",
+    y = NULL
+  )
+```
+
+---
+
+## 15. The Driftless Region's Small School Districts
+
+Southwestern Wisconsin's Driftless Area---unglaciated terrain known for dairy farms and winding valleys---is home to dozens of tiny school districts.
+
+```{r driftless-data}
+# Driftless region includes Crawford, Grant, Iowa, Lafayette, Richland, Vernon, and parts of others
+driftless_districts <- enr_2024 |>
+  filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL",
+         grepl("Prairie du Chien|Richland|Viroqua|Kickapoo|Westby|Cashton|La Farge|Hillsboro|Wonewoc|Necedah|Royall|Boscobel|Lancaster|Platteville|Fennimore|Potosi|Cassville|Seneca|River Ridge|Ithaca|Weston|De Soto|North Crawford|Riverdale|Pecatonica|Iowa-Grant|Highland|Mineral Point|Dodgeville",
+               district_name, ignore.case = TRUE)) |>
+  select(district_name, n_students) |>
+  arrange(n_students)
+
+driftless_districts
+```
+
+```{r driftless-chart}
+driftless_districts |>
+  mutate(district_name = forcats::fct_reorder(district_name, n_students)) |>
+  ggplot(aes(x = n_students, y = district_name,
+             fill = n_students < 500)) +
+  geom_col(show.legend = FALSE) +
+  scale_x_continuous(labels = scales::comma) +
+  scale_fill_manual(values = c("TRUE" = "#C5050C", "FALSE" = "#282728")) +
+  labs(
+    title = "Driftless Region School Districts",
+    subtitle = "Southwestern Wisconsin's small rural districts (under 500 highlighted)",
+    x = "Total Enrollment",
+    y = NULL
+  )
+```
+
+---
+
 ## Summary
 
 Wisconsin's school enrollment data reveals:
@@ -379,6 +552,9 @@ Wisconsin's school enrollment data reveals:
 - **Early childhood focus**: Wisconsin's 4K program shows commitment to early education
 - **Small district heritage**: Hundreds of tiny rural districts serve dairy country communities
 - **Demographic change**: Hispanic enrollment is growing, reshaping the state's student population
+- **Suburban demographics**: WOW counties have distinct demographic profiles from urban cores
+- **Service variation**: Special education and English learner rates vary significantly by region
+- **Two cities diverge**: Madison grows while Milwaukee shrinks, reflecting broader economic forces
 
 These patterns shape education policy across the Badger State.
 

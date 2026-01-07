@@ -81,7 +81,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Al Martin \email{almartin@example.com}
+\strong{Maintainer}: Al Martin \email{almartin@gmail.com}
 
 }
 \keyword{internal}
