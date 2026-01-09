@@ -21,7 +21,7 @@ Wisconsin public schools serve a substantial student population, with
 enrollment spread across urban centers and rural dairy country alike.
 
 ``` r
-enr <- fetch_enr_multi(2018:2024)
+enr <- fetch_enr_multi(2018:2024, use_cache = TRUE)
 
 state_totals <- enr |>
   filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") |>
@@ -63,7 +63,7 @@ Milwaukee Public Schools is by far the largest district, serving over
 70,000 students—more than the next five districts combined.
 
 ``` r
-enr_2024 <- fetch_enr(2024)
+enr_2024 <- fetch_enr(2024, use_cache = TRUE)
 
 top_10 <- enr_2024 |>
   filter(is_district, subgroup == "total_enrollment", grade_level == "TOTAL") |>
