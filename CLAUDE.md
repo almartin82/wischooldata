@@ -1,44 +1,13 @@
-### CONCURRENT TASK LIMIT
-- **Maximum 5 background tasks running simultaneously**
-- When launching multiple agents (e.g., for mass audits), batch them in groups of 5
-- Wait for the current batch to complete before launching the next batch
-
----
-
 ## CRITICAL DATA SOURCE RULES
 
 **NEVER use Urban Institute API, NCES CCD, or ANY federal data source** — the entire point of these packages is to provide STATE-LEVEL data directly from state DOEs. Federal sources aggregate/transform data differently and lose state-specific details. If a state DOE source is broken, FIX IT or find an alternative STATE source — do not fall back to federal data.
 
 ---
 
-## Data Sources
-
-Wisconsin DPI provides enrollment data through two systems:
-
-### WISEdash (2006-present) - PRIMARY SOURCE
-- **URL pattern**: `https://dpi.wi.gov/sites/default/files/wise/downloads/enrollment_by_gradelevel_certified_{year}.zip`
-- **Format**: ZIP containing CSV file
-- **Years available**: 2005-06 through 2023-24 (school year end 2006-2024)
-- **Data structure**: Long format with one row per school/grade/subgroup combination
-- **Key columns**: DISTRICT_CODE, SCHOOL_CODE, GRADE_LEVEL, GROUP_BY, GROUP_BY_VALUE, STUDENT_COUNT
-
-### Published PEM Files (1997-2005) - LEGACY SOURCE
-- **URL pattern**: `https://dpi.wi.gov/sites/default/files/imce/cst/xls/pem{YY}.xls`
-- **Format**: Excel workbook with multiple sheets
-- **Years available**: 2001-2011 (files for 2012-2016 return 404)
-- **Data sheet**: Named "PEM{YY}" (e.g., "PEM10" for 2010)
-- **Note**: Since WISEdash is available for 2006+, we only use PEM files for 1997-2005
-
-### Data Availability Summary
-| Years | Source | Status |
-|-------|--------|--------|
-| 2006-2024 | WISEdash ZIP | Active |
-| 1997-2005 | Published PEM Excel | Active |
-
-### Known Issues (as of 2026-01)
-- PEM files for years 2012-2016 return HTTP 404 (no longer available)
-- WISEdash files back to 2006 are fully functional
-- All current tests pass (166 tests)
+### CONCURRENT TASK LIMIT
+- **Maximum 5 background tasks running simultaneously**
+- When launching multiple agents (e.g., for mass audits), batch them in groups of 5
+- Wait for the current batch to complete before launching the next batch
 
 ---
 
@@ -49,65 +18,6 @@ Wisconsin DPI provides enrollment data through two systems:
 - NEVER reference Claude, Claude Code, or AI assistance in PR descriptions
 - NEVER add Co-Authored-By lines mentioning Claude or Anthropic
 - Keep commit messages focused on what changed, not how it was written
-
----
-
-## Local Testing Before PRs (REQUIRED)
-
-**PRs will not be merged until CI passes.** Run these checks locally BEFORE opening a PR:
-
-### CI Checks That Must Pass
-
-| Check | Local Command | What It Tests |
-|-------|---------------|---------------|
-| R-CMD-check | `devtools::check()` | Package builds, tests pass, no errors/warnings |
-| Python tests | `pytest tests/test_pywischooldata.py -v` | Python wrapper works correctly |
-| pkgdown | `pkgdown::build_site()` | Documentation and vignettes render |
-
-### Quick Commands
-
-```r
-# R package check (required)
-devtools::check()
-
-# Python tests (required)
-system("pip install -e ./pywischooldata && pytest tests/test_pywischooldata.py -v")
-
-# pkgdown build (required)
-pkgdown::build_site()
-```
-
-### Pre-PR Checklist
-
-Before opening a PR, verify:
-- [ ] `devtools::check()` — 0 errors, 0 warnings
-- [ ] `pytest tests/test_pywischooldata.py` — all tests pass
-- [ ] `pkgdown::build_site()` — builds without errors
-- [ ] Vignettes render (no `eval=FALSE` hacks)
-
----
-
-## LIVE Pipeline Testing
-
-This package includes `tests/testthat/test-pipeline-live.R` with LIVE network tests.
-
-### Test Categories:
-1. URL Availability - HTTP 200 checks
-2. File Download - Verify actual file (not HTML error)
-3. File Parsing - readxl/readr succeeds
-4. Column Structure - Expected columns exist
-5. get_raw_enr() - Raw data function works
-6. Data Quality - No Inf/NaN, non-negative counts
-7. Aggregation - State total > 0
-8. Output Fidelity - tidy=TRUE matches raw
-
-### Running Tests:
-```r
-devtools::test(filter = "pipeline-live")
-```
-
-See `state-schooldata/CLAUDE.md` for complete testing framework documentation.
-
 
 ---
 
@@ -157,6 +67,72 @@ If CI fails, fix the issue and push - auto-merge triggers when checks pass.
 
 ---
 
+## Local Testing Before PRs (REQUIRED)
+
+**PRs will not be merged until CI passes.** Run these checks locally BEFORE opening a PR:
+
+### CI Checks That Must Pass
+
+| Check | Local Command | What It Tests |
+|-------|---------------|---------------|
+| R-CMD-check | `devtools::check()` | Package builds, tests pass, no errors/warnings |
+| Python tests | `pytest tests/test_pyakschooldata.py -v` | Python wrapper works correctly |
+| pkgdown | `pkgdown::build_site()` | Documentation and vignettes render |
+
+### Quick Commands
+
+```r
+# R package check (required)
+devtools::check()
+
+# Python tests (required)
+system("pip install -e ./pyakschooldata && pytest tests/test_pyakschooldata.py -v")
+
+# pkgdown build (required)
+pkgdown::build_site()
+```
+
+### Pre-PR Checklist
+
+Before opening a PR, verify:
+- [ ] `devtools::check()` — 0 errors, 0 warnings
+- [ ] `pytest tests/test_pyakschooldata.py` — all tests pass
+- [ ] `pkgdown::build_site()` — builds without errors
+- [ ] Vignettes render (no `eval=FALSE` hacks)
+
+---
+
+## LIVE Pipeline Testing
+
+This package includes `tests/testthat/test-pipeline-live.R` with LIVE network tests.
+
+### Test Categories:
+1. URL Availability - HTTP 200 checks
+2. File Download - Verify actual file (not HTML error)
+3. File Parsing - readxl/readr succeeds
+4. Column Structure - Expected columns exist
+5. get_raw_enr() - Raw data function works
+6. Data Quality - No Inf/NaN, non-negative counts
+7. Aggregation - State total > 0
+8. Output Fidelity - tidy=TRUE matches raw
+
+### Running Tests:
+```r
+devtools::test(filter = "pipeline-live")
+```
+
+---
+
+## Fidelity Requirement
+
+**tidy=TRUE MUST maintain fidelity to raw, unprocessed data:**
+- Enrollment counts in tidy format must exactly match the wide format
+- No rounding or transformation of counts during tidying
+- Percentages are calculated fresh but counts are preserved
+- State aggregates are sums of school-level data
+
+---
+
 ## README Images from Vignettes (REQUIRED)
 
 **NEVER use `man/figures/` or `generate_readme_figs.R` for README images.**
@@ -179,7 +155,7 @@ README images MUST come from pkgdown-generated vignette output so they auto-upda
 
 The Idaho fix revealed critical bugs when README code didn't match vignettes:
 - Wrong district names (lowercase vs ALL CAPS)
-- Text claims that contradicted actual data  
+- Text claims that contradicted actual data
 - Missing data output in examples
 
 ### README Story Structure (REQUIRED)
@@ -202,11 +178,11 @@ The `state-deploy` skill verifies this before deployment:
 
 ### What This Prevents
 
-- ❌ Wrong district/entity names (case sensitivity, typos)
-- ❌ Text claims that contradict data
-- ❌ Broken code that fails silently
-- ❌ Missing data output
-- ✅ Verified, accurate, reproducible examples
+- Wrong district/entity names (case sensitivity, typos)
+- Text claims that contradict data
+- Broken code that fails silently
+- Missing data output
+- Verified, accurate, reproducible examples
 
 ### Example
 
@@ -233,68 +209,35 @@ enr %>%
 ![Chart](https://almartin82.github.io/arschooldata/articles/...)
 ```
 
-
 ---
 
-## README and Vignette Code Matching (REQUIRED)
+# wischooldata
 
-**CRITICAL RULE (as of 2026-01-08):** ALL code blocks in the README MUST match code in a vignette EXACTLY (1:1 correspondence).
+## Data Sources
 
-### Why This Matters
+Wisconsin DPI provides enrollment data through two systems:
 
-The Idaho fix revealed critical bugs when README code didn't match vignettes:
-- Wrong district names (lowercase vs ALL CAPS)
-- Text claims that contradicted actual data  
-- Missing data output in examples
+### WISEdash (2006-present) - PRIMARY SOURCE
+- **URL pattern**: `https://dpi.wi.gov/sites/default/files/wise/downloads/enrollment_by_gradelevel_certified_{year}.zip`
+- **Format**: ZIP containing CSV file
+- **Years available**: 2005-06 through 2023-24 (school year end 2006-2024)
+- **Data structure**: Long format with one row per school/grade/subgroup combination
+- **Key columns**: DISTRICT_CODE, SCHOOL_CODE, GRADE_LEVEL, GROUP_BY, GROUP_BY_VALUE, STUDENT_COUNT
 
-### README Story Structure (REQUIRED)
+### Published PEM Files (1997-2005) - LEGACY SOURCE
+- **URL pattern**: `https://dpi.wi.gov/sites/default/files/imce/cst/xls/pem{YY}.xls`
+- **Format**: Excel workbook with multiple sheets
+- **Years available**: 2001-2011 (files for 2012-2016 return 404)
+- **Data sheet**: Named "PEM{YY}" (e.g., "PEM10" for 2010)
+- **Note**: Since WISEdash is available for 2006+, we only use PEM files for 1997-2005
 
-Every story/section in the README MUST follow this structure:
+### Data Availability Summary
+| Years | Source | Status |
+|-------|--------|--------|
+| 2006-2024 | WISEdash ZIP | Active |
+| 1997-2005 | Published PEM Excel | Active |
 
-1. **Claim**: A factual statement about the data
-2. **Explication**: Brief explanation of why this matters
-3. **Code**: R code that fetches and analyzes the data (MUST exist in a vignette)
-4. **Code Output**: Data table/print statement showing actual values (REQUIRED)
-5. **Visualization**: Chart from vignette (auto-generated from pkgdown)
-
-### Enforcement
-
-The `state-deploy` skill verifies this before deployment:
-- Extracts all README code blocks
-- Searches vignettes for EXACT matches
-- Fails deployment if code not found in vignettes
-- Randomly audits packages for claim accuracy
-
-### What This Prevents
-
-- ❌ Wrong district/entity names (case sensitivity, typos)
-- ❌ Text claims that contradict data
-- ❌ Broken code that fails silently
-- ❌ Missing data output
-- ✅ Verified, accurate, reproducible examples
-
-### Example
-
-```markdown
-### 1. State enrollment grew 28% since 2002
-
-State added 68,000 students from 2002 to 2026, bucking national trends.
-
-```r
-library(idschooldata)
-library(dplyr)
-
-enr <- fetch_enr_multi(2002:2026)
-
-enr %>%
-  filter(is_state, subgroup == "total_enrollment", grade_level == "TOTAL") %>%
-  select(end_year, n_students) %>%
-  filter(end_year %in% c(2002, 2026)) %>%
-  mutate(change = n_students - lag(n_students),
-         pct_change = round((n_students / lag(n_students) - 1) * 100, 1))
-# Prints: 2002=XXX, 2026=YYY, change=ZZZ, pct=PP.P%
-```
-
-![Chart](https://almartin82.github.io/idschooldata/articles/...)
-```
-
+### Known Issues (as of 2026-01)
+- PEM files for years 2012-2016 return HTTP 404 (no longer available)
+- WISEdash files back to 2006 are fully functional
+- All current tests pass (166 tests)
